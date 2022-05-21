@@ -1,0 +1,14 @@
+        <requirement type="package" version="1.9.O">r-future.apply</requirement>
+        <requirement type="package" version="1.25.0">r-future</requirement>
+
+        <requirement type="package" version="1.5_29">r-rgdal</requirement>
+
+
+
+
+
+            '$__tool_directory__/cwrapper.r'
+            '$__tool_directory__/dggridr.r'
+
+    source(args[7])
+    source(args[8])

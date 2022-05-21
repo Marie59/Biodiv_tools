@@ -1,0 +1,83 @@
+{% set version = '1.9.4' %}
+
+{% set posix = 'm2-' if win else '' %}
+{% set native = 'm2w64-' if win else '' %}
+
+package:
+  name: r-biodivmapr
+  version: {{ version|replace("-", "_") }}
+
+source:
+  fn: biodivmar_{{ version }}.tar.gz
+  url:
+    - https://github.com/jbferet/biodivMapR_{{ version }}.tar.gz
+    #- https://cran.r-project.org/src/contrib/Archive/acepack/acepack_{{ version }}.tar.gz ?
+
+
+  #sha256: 82750507926f02a696f6cc03693e8d4a5ee7e92500c8c15a16a9c12addcd28b9 ?
+  # patches:
+   # List any patch files here
+   # - fix.patch
+
+build:
+  # If this is a new build for the same version, increment the build number.
+  number: 0
+
+  # This is required to make R link correctly on Linux.
+  rpaths:
+    - lib/R/lib/
+    - lib/
+
+# Suggests: testthat
+requirements:
+  build:
+    - r-base
+    - posix                # [win]
+    - {{native}}toolchain  # [win]
+    - gcc                  # [not win]
+
+  run:
+    - r-base
+    - {{native}}gcc-libs   # [win]
+    - libgcc               # [not win]
+
+test:
+  commands:
+    # You can put additional test commands to be run here.
+   # - $R -e "library('acepack')"  # [not win] ?
+   # - "\"%R%\" -e \"library('acepack')\""  # [win] ?
+
+  # You can also put a file called run_test.py, run_test.sh, or run_test.bat
+  # in the recipe that will be run at test time.
+
+  # requires:
+    # Put any additional test requirements here.
+
+about:
+  home: https://github.com/jbferet/biodivMapR
+  license: GPL-3 + file LICENSE
+  summary:  This packages allows processing image data based on the method described in the following publication:
+    Féret, J.-B., Asner, G.P., 2014. Mapping tropical forest canopy diversity using high-fidelity imaging spectroscopy. Ecol. Appl. 24, 1289–1296. https://doi.org/10.1890/13-1824.1
+    It expects an image file as input, with a specific data format. ENVI HDR image with BIL interleave required.
+  license_family: GPL-3
+
+# The original Github metadata for this package was:
+
+# Package: biodivmapr
+# Maintainer: Shawn Garbett <shawn.garbett@vanderbilt.edu>
+# Version: 1.9.4
+# Author: Jean-Baptiste Feret, Florain De Boissieu
+# Description: This packages allows processing image data based on the method described in the following publication:
+    Féret, J.-B., Asner, G.P., 2014. Mapping tropical forest canopy diversity using high-fidelity imaging spectroscopy. Ecol. Appl. 24, 1289–1296. https://doi.org/10.1890/13-1824.1
+    It expects an image file as input, with a specific data format. ENVI HDR image with BIL interleave required.
+# Title: biodivMapR: an R package for a- and ß-diversity mapping using remotely-sensed images
+# License: GPL-3 + file LICENSE
+# Suggests: knitr, rmarkdown, testthat (>= 2.0.0)
+# Packaged: 2016-10-28 15:38:59 UTC; garbetsp ???
+# Repository: Github
+# Date/Publication: 2016-10-29 00:11:52 ???
+# NeedsCompilation: yes ???
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml

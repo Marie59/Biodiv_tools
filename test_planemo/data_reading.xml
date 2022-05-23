@@ -26,23 +26,16 @@
         <requirement type="package" version="0.4_4">r-snow</requirement>
         <requirement type="package" version="1.4.0">r-stringr</requirement>
         <requirement type="package" version="2.6_2">r-vegan</requirement>
-        <requirement type="package" version="2.4.2">r-remotes</requirement>              
+        <requirement type="package" version="2.4.2">r-remotes</requirement> 
+        <requirement type="package" version="3.0.0">r-emstreer</requirement>
+        <requirement type="package" version="1.6.1">r-mmand</requirement>
+        <requirement type="package" version="1.0">r-dissutils</requirement>              
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
         Rscript
             '$__tool_directory__/data_reading.r'
             '$input_1'
             '$input_2'
-            '$__tool_directory__/Lib_ImageProcess.r'
-            '$__tool_directory__/Lib_FilterData.r'
-            '$__tool_directory__/Lib_PerformPCA.r'
-            '$__tool_directory__/Lib_MapSpectralSpecies.r'
-            '$__tool_directory__/Lib_MapAlphaDiversity.r'
-            '$__tool_directory__/Lib_MapBetaDiversity.r'
-            '$__tool_directory__/Lib_MapFunctionalDiversity.r'
-            '$__tool_directory__/Lib_ValidationbiodivMapR.r'
-            '$__tool_directory__/Lib_CheckConvertData.r'
-            '$__tool_directory__/Lib_ContinuumRemoval.r'
             '$output_shannon'
             '$output_alpha'
             '$output_beta'

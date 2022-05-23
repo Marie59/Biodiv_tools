@@ -19,7 +19,7 @@
 #' @examples
 gmap_indicator <- function(
     grid, column = "shannon", label = "Shannon index", trans = "identity",
-    crs="+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"){
+    crs = "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"){
 
   world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
   bb <- sf::st_bbox(

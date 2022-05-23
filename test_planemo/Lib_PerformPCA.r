@@ -584,7 +584,7 @@ select_PCA_components <- function(Input_Image_File, Output_Dir, PCA_Files, TypeP
     # } else {
     #   file.edit(Sel_PC, title=basename(Sel_PC))
     # }
-   #utils::file.edit(Sel_PC, title=basename(Sel_PC))
+   utils::file.edit(Sel_PC, title=basename(Sel_PC))
 
   }
   message("*********************************************************")

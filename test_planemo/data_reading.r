@@ -29,16 +29,6 @@ if (length(args) < 1) {
 }else{
     data_raster <- args[1]
     rasterheader <- args[2]
-    source(args[3])
-    source(args[4])
-    source(args[5])
-    source(args[6])
-    source(args[7])
-    source(args[8])
-    source(args[9])
-    source(args[10])
-    source(args[11])
-    source(args[12])
 }   
 
 #####Import data
@@ -51,13 +41,13 @@ destfile <- file.path(tmpdir,NameRaster,fsep = '/')
 
 # name your binary raster with the same name as the online file
 # name your raster HDR with the same name as the binary raster, with .hdr extension
-destfile_HDR <- get_HDR_name(destfile,showWarnings = FALSE)
+destfile_HDR <- biodivMapR::get_HDR_name(destfile,showWarnings = FALSE)
 
-url <- 'https://gitlab.com/jbferet/myshareddata/-/raw/master/biodivMapR_S2_Sample/RASTER/S2A_T33NUD_20180104_Subset'
-download.file(url = url, destfile = destfile, method = 'auto', quiet = FALSE, mode = "wb")
+#url <- 'https://gitlab.com/jbferet/myshareddata/-/raw/master/biodivMapR_S2_Sample/RASTER/S2A_T33NUD_20180104_Subset'
+#download.file(url = url, destfile = destfile, method = 'auto', quiet = FALSE, mode = "wb")
 
-urlhdr <- 'https://gitlab.com/jbferet/myshareddata/-/raw/master/biodivMapR_S2_Sample/RASTER/S2A_T33NUD_20180104_Subset.hdr'
-download.file(url = urlhdr, destfile = destfile_HDR, method = 'auto', quiet = FALSE, mode = "w")
+#urlhdr <- 'https://gitlab.com/jbferet/myshareddata/-/raw/master/biodivMapR_S2_Sample/RASTER/S2A_T33NUD_20180104_Subset.hdr'
+#download.file(url = urlhdr, destfile = destfile_HDR, method = 'auto', quiet = FALSE, mode = "w")
 
 # read ENVI file with starss
 #Stars_S2 <- stars::read_stars(destfile, along = 'band',proxy = FALSE)
@@ -131,12 +121,12 @@ Continuum_Removal <- TRUE
 
 print("PERFORM RADIOMETRIC FILTERING")
 
-ImPathShade <- perform_radiometric_filtering(
+ImPathShade <- biodivMapR::perform_radiometric_filtering(
   Image_Path = Input_Image_File, Mask_Path = Input_Mask_File, Output_Dir = Output_Dir, NDVI_Thresh = NDVI_Thresh, 
   Blue_Thresh = Blue_Thresh, NIR_Thresh = NIR_Thresh)
 
 print("PERFORM PCA ON RASTER")
-PCA_Output <- perform_PCA(Input_Image_File = Input_Image_File, Input_Mask_File = Input_Mask_File,
+PCA_Output <- biodivMapR::perform_PCA(Input_Image_File = Input_Image_File, Input_Mask_File = Input_Mask_File,
                           Output_Dir = Output_Dir, TypePCA = TypePCA, FilterPCA = FilterPCA, nbCPU = nbCPU, MaxRAM = MaxRAM)
 PCA_Files <- PCA_Output$PCA_Files
 Pix_Per_Partition <- PCA_Output$Pix_Per_Partition
@@ -151,20 +141,20 @@ Input_Mask_File <- PCA_Output$MaskPath
 #select_PCA_components(Input_Image_File,Output_Dir,PCA.Files)
 # Select components from the PCA/SPCA/MNF raster
 # Sel_PC = path of the file where selected components are stored
-stop('lo')
-Sel_PC <- select_PCA_components(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, PCA_Files = PCA_Files, TypePCA = TypePCA, File_Open = TRUE)
 
+Sel_PC <- biodivMapR::select_PCA_components(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, PCA_Files = PCA_Files, TypePCA = TypePCA, File_Open = TRUE)
+stop('lo')
 ################################################################################
 ##                      MAP ALPHA AND BETA DIVERSITY                          ##
 ################################################################################
 print("MAP SPECTRAL SPECIES")
 
-Kmeans_info <- map_spectral_species(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, PCA_Files = PCA_Files, Input_Mask_File = Input_Mask_File, Pix_Per_Partition = Pix_Per_Partition, nb_partitions = nb_partitions, nbCPU = nbCPU, MaxRAM = MaxRAM, nbclusters = nbclusters, TypePCA = TypePCA)
+Kmeans_info <- biodivMapR::map_spectral_species(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, PCA_Files = PCA_Files, Input_Mask_File = Input_Mask_File, Pix_Per_Partition = Pix_Per_Partition, nb_partitions = nb_partitions, nbCPU = nbCPU, MaxRAM = MaxRAM, nbclusters = nbclusters, TypePCA = TypePCA)
 
 
 print("MAP ALPHA DIVERSITY")
 Index_Alpha <- c('Shannon')
-alpha_div <- map_alpha_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM, Index_Alpha = Index_Alpha, nbclusters = nbclusters)
+alpha_div <- biodivMapR::map_alpha_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM, Index_Alpha = Index_Alpha, nbclusters = nbclusters)
 
 
 #alpha_file <- raster::raster(alpha_div)
@@ -174,7 +164,7 @@ alpha_div <- map_alpha_div(Input_Image_File = Input_Image_File, Output_Dir = Out
 
 
 print("MAP BETA DIVERSITY")
-beta_div <- map_beta_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nb_partitions=nb_partitions, nbCPU = nbCPU, MaxRAM = MaxRAM, nbclusters = nbclusters)
+beta_div <- biodivMapR::map_beta_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nb_partitions=nb_partitions, nbCPU = nbCPU, MaxRAM = MaxRAM, nbclusters = nbclusters)
 
 #beta_file <- raster::raster(beta_div)
 #beta_map <- mapview::mapview(beta_file, layer.name = "PCoA", col.regions = c("red", "blue", "green")) + mapview::mapview(betafull_file, legend = FALSE, col.regions = c("red", "blue", "green"))
@@ -188,7 +178,7 @@ beta_div <- map_beta_div(Input_Image_File = Input_Image_File, Output_Dir = Outpu
 ## read selected features from dimensionality reduction 
 Selected_Features <- read.table(Sel_PC)[[1]]
 ## path for selected components
-mapper <- map_functional_div(Original_Image_File = Input_Image_File, Functional_File = PCA_Files,  Selected_Features = Selected_Features, Output_Dir = Output_Dir, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM,TypePCA = TypePCA)
+mapper <- biodivMapR::map_functional_div(Original_Image_File = Input_Image_File, Functional_File = PCA_Files,  Selected_Features = Selected_Features, Output_Dir = Output_Dir, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM,TypePCA = TypePCA)
 
 # location of the directory where shapefiles used for validation are saved
 VectorDir <- destunz
@@ -198,7 +188,7 @@ Name_Vector <- tools::file_path_sans_ext(basename(Path_Vector))
 # location of the spectral species raster needed for validation
 Path_SpectralSpecies <- Kmeans_info$SpectralSpecies
 # get diversity indicators corresponding to shapefiles (no partitioning of spectral dibversity based on field plots so far...)
-Biodiv_Indicators <- diversity_from_plots(Raster_SpectralSpecies = Path_SpectralSpecies, Plots = Path_Vector, nbclusters = nbclusters, Raster_Functional = PCA_Files, Selected_Features = Selected_Features)
+Biodiv_Indicators <- biodivMapR::diversity_from_plots(Raster_SpectralSpecies = Path_SpectralSpecies, Plots = Path_Vector, nbclusters = nbclusters, Raster_Functional = PCA_Files, Selected_Features = Selected_Features)
 
 Shannon_RS <- c(Biodiv_Indicators$Shannon)[[1]]
 FRic <- c(Biodiv_Indicators$FunctionalDiversity$FRic)
@@ -263,11 +253,11 @@ for (i in 1: length(nbSamples)){
 Results <- data.frame('vgtype' = Type_Vegetation, 'pco1' = BetaPCO$points[,1], 'pco2' = BetaPCO$points[,2], 'pco3' = BetaPCO$points[,3], 'shannon' = Shannon_RS, 'FRic' = FRic, 'FEve' = FEve, 'FDiv' = FDiv)
                       
 # plot field data in the PCoA space, with size corresponding to shannon index
-g1 <- ggplot2::ggplot(Results, aes(x = pco1, y = pco2, color = vgtype, size = shannon)) + geom_point(alpha = 0.6) + scale_color_manual(values = c("#e6140a", "#e6d214", "#e68214", "#145ae6"))
+g1 <- ggplot2::ggplot(Results, ggplot2::aes(x = pco1, y = pco2, color = vgtype, size = shannon)) + ggplot2::geom_point(alpha = 0.6) + ggplot2::scale_color_manual(values = c("#e6140a", "#e6d214", "#e68214", "#145ae6"))
 
-g2 <- ggplot2::ggplot(Results, aes(x = pco1, y = pco3, color = vgtype, size = shannon)) + geom_point(alpha = 0.6) + scale_color_manual(values = c("#e6140a", "#e6d214", "#e68214", "#145ae6"))
+g2 <- ggplot2::ggplot(Results, ggplot2::aes(x = pco1, y = pco3, color = vgtype, size = shannon)) + ggplot2::geom_point(alpha = 0.6) + ggplot2::scale_color_manual(values = c("#e6140a", "#e6d214", "#e68214", "#145ae6"))
 
-g3 <- ggplot2::ggplot(Results, aes(x = pco2, y = pco3, color = vgtype, size = shannon)) + geom_point(alpha = 0.6) + scale_color_manual(values = c("#e6140a", "#e6d214", "#e68214", "#145ae6"))                     
+g3 <- ggplot2::ggplot(Results, ggplot2::aes(x = pco2, y = pco3, color = vgtype, size = shannon)) + ggplot2::geom_point(alpha = 0.6) + ggplot2::scale_color_manual(values = c("#e6140a", "#e6d214", "#e68214", "#145ae6"))                     
 
 #extract legend                 
 get_legend <- function(a.gplot) {

@@ -38,6 +38,9 @@ if (hr == "false") {
   hr <- TRUE
 }
 
+if (crs == "0") {
+   crs <- "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+}
 #####Import data
 
 #Get biological occurrences
@@ -71,25 +74,25 @@ grid <- dggridR::dgcellstogrid(dggs, idx$cell) %>%
 #Plot maps of indicators
 #Let’s look at the resulting indicators in map form.
 # ES(50)
-es_50_map <- gmap_indicator(grid, "es", label = "ES(50)") + ggplot2::theme(legend.position = "none")
-es_50 <- ggplot2::ggsave("ES_50.png", es_50_map, scale = 1, width = 4, height = 1, units = "in", dpi = 500, limitsize = TRUE)
+es_50_map <- gmap_indicator(grid, "es", label = "ES(50)")
+es_50 <- ggplot2::ggsave("ES_50.png", es_50_map, scale = 0.38, width = 12, height = 7, units = "in", dpi = 300, limitsize = TRUE)
 
 # Shannon index
 shannon_map <- gmap_indicator(grid, "shannon", label = "Shannon index")
-shannon <- ggplot2::ggsave("Shannon_index.png", shannon_map, scale = 1, width = 4, height = 1, units = "in", dpi = 500, limitsize = TRUE)
+shannon <- ggplot2::ggsave("Shannon_index.png", shannon_map, scale = 0.38, width = 12, height = 7, units = "in", dpi = 300, limitsize = TRUE)
 
 
 # Number of records, log10 scale, Geographic projection
 records_map <- gmap_indicator(grid, "n", label = "# of records", trans = "log10", crs = crs)
-records <- ggplot2::ggsave("Records.png", records_map, scale = 1, width = 4, height = 1, units = "in", dpi = 500, limitsize = TRUE)
+records <- ggplot2::ggsave("Records.png", records_map, scale = 0.38, width = 12, height = 7, units = "in", dpi = 300, limitsize = TRUE)
 
 # Simpson index
 simpson_map <- gmap_indicator(grid, "simpson", label = "Simpson index")
-simpson <- ggplot2::ggsave("Simpson_index.png", simpson_map, scale = 1, width = 4, height = 1, units = "in", dpi = 500, limitsize = TRUE)
+simpson <- ggplot2::ggsave("Simpson_index.png", simpson_map, scale = 0.38, width = 12, height = 7, units = "in", dpi = 300, limitsize = TRUE)
 
 # maxp
 maxp_map <- gmap_indicator(grid, "maxp", label = "maxp index")
-maxp <- ggplot2::ggsave("Maxp.png", maxp_map, scale = 1, width = 4, height = 1, units = "in", dpi = 500, limitsize = TRUE)
+maxp <- ggplot2::ggsave("Maxp.png", maxp_map, scale = 0.38, width = 12, height = 7, units = "in", dpi = 300, limitsize = TRUE)
 
 #Mapping
 es_50

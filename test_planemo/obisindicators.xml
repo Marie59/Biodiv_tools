@@ -32,7 +32,7 @@
     <inputs>
         <expand macro="SRS_input"/>
         <param name="type" type="select" label="Type of projection for the map : select your coordinate reference system (CRS)">
-            <option value="54030">Robinson projection</option>
+            <option value="0">Robinson projection</option>
             <option value="4326">Geographic projection</option>
         </param>
     </inputs>

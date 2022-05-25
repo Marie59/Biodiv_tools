@@ -21,6 +21,11 @@
             '$__tool_directory__/obisindicators.r'
             '$input'
             '$colnames'
+            '$separator'
+            '$longitude'
+            '$latitude'
+            '$species'
+            '$records'
             '$type'
             '$__tool_directory__/analyze.r'
             '$__tool_directory__/visualize.r'
@@ -31,8 +36,12 @@
     </command>
     <inputs>
         <expand macro="SRS_input"/>
+        <param name="longitude" label="Select column containing the decimal value of the longitude " type="data_column" data_ref="input" numerical="true" use_header_names="true"/>
+        <param name="latitude" label="Select column containing the decimal value of the latitude " type="data_column" data_ref="input" numerical="true" use_header_names="true"/>
+        <param name="species" label="Select column containing the species " type="data_column" data_ref="input" use_header_names="true"/>
+        <param name="records" label="Select column containing the number of records" type="data_column" data_ref="input" numerical="true" use_header_names="true"/>
         <param name="type" type="select" label="Type of projection for the map : select your coordinate reference system (CRS)">
-            <option value="54030">Robinson projection</option>
+            <option value="0">Robinson projection</option>
             <option value="4326">Geographic projection</option>
         </param>
     </inputs>
@@ -45,9 +54,14 @@
     </outputs>
     <tests>
         <test>
-            <param name="input" value="occ.csv"/>
+            <param name="input" value="occ_at.tabular"/>
             <param name="colnames" value="true"/>
-            <param name="type" value="4326"/>
+            <param name="separator" value="t"/>
+            <param name="longitude" value="c1: decimalLongitude"/>
+            <param name="latitude" value="c2: decimalLatitude"/>
+            <param name="species" value="c3: species"/>
+            <param name="records" value="c5: records"/>
+            <param name="type" value="0"/>
             <output name="output_index" value="Index.csv"/>
             <output_collection name="plots" type="list" count="5">
                 <element name="ES_50" ftype="png">

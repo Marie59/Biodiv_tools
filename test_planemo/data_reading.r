@@ -32,22 +32,12 @@ if (length(args) < 1) {
 }   
 
 #####Import data
+destfile <- readBin(data_raster, "raw")
 
-destfile <- data_raster
-tmpdir <- "/home/pndb-cr/Marie/Scriptr_MJ"
-# name your binary raster with the same name as the online file
-NameRaster <- 'S2A_T33NUD_20180104_Subset'
-destfile <- file.path(tmpdir,NameRaster,fsep = '/')
+destfile_HDR <- readLines(rasterheader)
 
 # name your binary raster with the same name as the online file
 # name your raster HDR with the same name as the binary raster, with .hdr extension
-destfile_HDR <- biodivMapR::get_HDR_name(destfile,showWarnings = FALSE)
-
-#url <- 'https://gitlab.com/jbferet/myshareddata/-/raw/master/biodivMapR_S2_Sample/RASTER/S2A_T33NUD_20180104_Subset'
-#download.file(url = url, destfile = destfile, method = 'auto', quiet = FALSE, mode = "wb")
-
-#urlhdr <- 'https://gitlab.com/jbferet/myshareddata/-/raw/master/biodivMapR_S2_Sample/RASTER/S2A_T33NUD_20180104_Subset.hdr'
-#download.file(url = urlhdr, destfile = destfile_HDR, method = 'auto', quiet = FALSE, mode = "w")
 
 # read ENVI file with starss
 #Stars_S2 <- stars::read_stars(destfile, along = 'band',proxy = FALSE)

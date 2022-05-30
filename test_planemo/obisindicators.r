@@ -12,8 +12,6 @@
 #               rnaturalearthdata
 #               viridis
 #               dggridr
-
-remotes::install_github("r-barnes/dggridR")
 library(magrittr)
 #####Load arguments
 
@@ -76,12 +74,17 @@ idx <- calc_indicators(occ)
 write.table(idx, file = "Index.csv", sep = ",", dec = ".", na = " ", col.names = T, row.names = F, quote = FALSE)
 
 #dd cell geometries to the indicators table (idx)
-grid <- dggridR::dgcellstogrid(dggs, idx$cell) %>% 
-  sf::st_wrap_dateline() %>% 
-  dplyr::rename(cell = seqnum) %>% 
+data <- dggridR::dgcellstogrid(dggs, idx$cell)
+data_sf <- sf::st_as_sf(data, coords = c("long","lat"))
+sf::st_crs(data_sf) <- 4326
+data_sf$cell <- as.double(data_sf$cell)
+
+grid <- sf::st_wrap_dateline(data_sf) %>%  
   dplyr::left_join(
     idx,
     by = "cell")
+
+#grid <- dplyr::left_join(dplyr::rename(sf::st_wrap_dateline(dggridR::dgcellstogrid(dggs, idx$cell)), cell = seqnum), idx, by = "cell")
 
 #Plot maps of indicators
 #Let’s look at the resulting indicators in map form.

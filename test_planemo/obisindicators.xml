@@ -5,16 +5,15 @@
     </macros>
     <expand macro="topic"/>
     <expand macro="SRS_requirements">
+            <requirement type="package" version="2.0.4">r-dggridR</requirement>
+            <requirement type="package" version="2.0.3">r-magrittr</requirement>
             <requirement type="package" version="1.0.9">r-dplyr</requirement>
             <requirement type="package" version="1.0_7">r-sf</requirement>
             <requirement type="package" version="2.1_7.1">r-gsl</requirement>
             <requirement type="package" version="0.1.0">r-rnaturalearth</requirement>
             <requirement type="package" version="0.1.0">r-rnaturalearthdata</requirement>
             <requirement type="package" version="0.6.2">r-viridis</requirement>
-            <requirement type="package" version="1.4_7">r-sp</requirement>
-            <requirement type="package" version="1.0.2">r-rlang</requirement>
             <requirement type="package" version="2.4.2">r-remotes</requirement>
-            <requirement type="package" version="2.0.3">r-magrittr</requirement>
     </expand>
     <command detect_errors="exit_code"><![CDATA[
         Rscript

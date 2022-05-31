@@ -74,12 +74,8 @@ idx <- calc_indicators(occ)
 write.table(idx, file = "Index.csv", sep = ",", dec = ".", na = " ", col.names = T, row.names = F, quote = FALSE)
 
 #dd cell geometries to the indicators table (idx)
-data <- dggridR::dgcellstogrid(dggs, idx$cell)
-data_sf <- sf::st_as_sf(data, coords = c("long","lat"))
-sf::st_crs(data_sf) <- 4326
-data_sf$cell <- as.double(data_sf$cell)
-
-grid <- sf::st_wrap_dateline(data_sf) %>%  
+grid <- dggridR::dgcellstogrid(dggs, idx$cell) %>%
+  sf::st_wrap_dateline(data_sf) %>%  
   dplyr::left_join(
     idx,
     by = "cell")

@@ -19,15 +19,15 @@
 #' @examples
 gmap_indicator <- function(
     grid, column = "shannon", label = "Shannon index", trans = "identity",
-    crs="+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"){
+    crs = "+proj=robin +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"){
 
   world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
   bb <- sf::st_bbox(
-    st_transform(grid, crs))
+    sf::st_transform(grid, crs))
 
-  ggplot() +
-    geom_sf(
-      data = grid, aes_string(
+  ggplot2::ggplot() +
+    ggplot2::geom_sf(
+      data = grid, ggplot2::aes_string(
         fill = column, geometry = "geometry"), lwd = 0) +
     viridis::scale_color_viridis(
       option = "inferno", na.value = "white",
@@ -35,21 +35,21 @@ gmap_indicator <- function(
     viridis::scale_fill_viridis(
       option = "inferno", na.value = "white",
       name = label, trans = trans) +
-    geom_sf(
+    ggplot2::geom_sf(
       data = world, fill = "#dddddd", color = NA) +
-    theme(
-      panel.grid.major.x = element_blank(),
-      panel.grid.major.y = element_blank(),
-      panel.grid.minor.x = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      panel.background = element_blank(),
-      axis.text.x = element_blank(),
-      axis.text.y = element_blank(),
-      axis.ticks = element_blank(),
-      axis.title.x = element_blank(),
-      axis.title.y = element_blank()) +
-    xlab("") + ylab("") +
-    coord_sf(
+    ggplot2::theme(
+      panel.grid.major.x = ggplot2::element_blank(),
+      panel.grid.major.y = ggplot2::element_blank(),
+      panel.grid.minor.x = ggplot2::element_blank(),
+      panel.grid.minor.y = ggplot2::element_blank(),
+      panel.background = ggplot2::element_blank(),
+      axis.text.x = ggplot2::element_blank(),
+      axis.text.y = ggplot2::element_blank(),
+      axis.ticks = ggplot2::element_blank(),
+      axis.title.x = ggplot2::element_blank(),
+      axis.title.y = ggplot2::element_blank()) +
+    ggplot2::xlab("") + ggplot2::ylab("") +
+    ggplot2::coord_sf(
       crs  = crs,
       xlim = bb[c("xmin","xmax")],
       ylim = bb[c("ymin","ymax")])

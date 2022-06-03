@@ -29,13 +29,17 @@
         <requirement type="package" version="2.4.2">r-remotes</requirement> 
         <requirement type="package" version="3.0.0">r-emstreer</requirement>
         <requirement type="package" version="1.6.1">r-mmand</requirement>
-        <requirement type="package" version="1.0">r-dissutils</requirement>              
+        <requirement type="package" version="1.0">r-dissutils</requirement>  
+        <requirement type="package" version="3.2.2">r-filesstrings</requirement>  
     </requirements>
-    <command detect_errors="exit_code"><![CDATA[
+    <command detect_errors="exit_code"><![CDATA[ 
+        ls > 1 &&
+        cp $input_raster ${input_raster.element_identifier} &&
+        cp $input_header ${input_header.element_identifier} &&
         Rscript
             '$__tool_directory__/data_reading.r'
-            '$input_1'
-            '$input_2'
+            '$input_raster.element_identifier'
+            '$input_header.element_identifier'
             '$output_shannon'
             '$output_alpha'
             '$output_beta'
@@ -43,8 +47,8 @@
         ]]>
     </command>
     <inputs>
-        <param name="input_1" type="data" format="binary" label="Input raster"/>
-        <param name="input_2" type="data" format="txt" label="Input raster header"/>
+        <param name="input_raster" type="data" format="binary,txt" label="Input raster"/>
+        <param name="input_header" type="data" format="txt" label="Input raster header"/>
     </inputs>
     <outputs>
         <data name="output_shannon" from_work_dir="ShannonIndex.csv" format="csv" label="Shannon Index">

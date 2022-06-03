@@ -32,9 +32,15 @@ if (length(args) < 1) {
 }   
 
 #####Import data
-destfile <- readBin(data_raster, "raw")
+#créer un dir ou on est mettre les 2 fichier recup le chemin et partir de ce chemin la ??
+dir.create("data_path")
+setwd("data_path")
+filesstrings::file.move(rasterheader, "data_path")
+filesstrings::file.move(data_raster, "data_path")
 
-destfile_HDR <- readLines(rasterheader)
+#destfile_HDR <- biodivMapR::read_ENVI_header(rasterheader)
+
+#destfile <- biodivMapR::read_BIL_image_subset(data_raster, destfile_HDR)
 
 # name your binary raster with the same name as the online file
 # name your raster HDR with the same name as the binary raster, with .hdr extension
@@ -65,8 +71,8 @@ WLunits <- 'Nanometers'
 ################################################################################
 # expected to be in ENVI HDR  
 
-Input_Image_File <- destfile
-
+Input_Image_File <- file.path("data_path", basename(data_raster), fsep = "/")
+stop(Input_Image_File)
 # path for the Mask raster corresponding to image to process
 # expected to be in ENVI HDR format, 1 band, integer 8bits
 # expected values in the raster: 0 = masked, 1 = selected
@@ -110,7 +116,6 @@ NIR_Thresh  <- 1500
 Continuum_Removal <- TRUE
 
 print("PERFORM RADIOMETRIC FILTERING")
-
 ImPathShade <- biodivMapR::perform_radiometric_filtering(
   Image_Path = Input_Image_File, Mask_Path = Input_Mask_File, Output_Dir = Output_Dir, NDVI_Thresh = NDVI_Thresh, 
   Blue_Thresh = Blue_Thresh, NIR_Thresh = NIR_Thresh)
@@ -133,7 +138,7 @@ Input_Mask_File <- PCA_Output$MaskPath
 # Sel_PC = path of the file where selected components are stored
 
 Sel_PC <- biodivMapR::select_PCA_components(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, PCA_Files = PCA_Files, TypePCA = TypePCA, File_Open = TRUE)
-stop('lo')
+
 ################################################################################
 ##                      MAP ALPHA AND BETA DIVERSITY                          ##
 ################################################################################

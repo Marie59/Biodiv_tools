@@ -1,5 +1,8 @@
 <tool id="SRS_preprocess_S2" name="Preprocessing sentinel 2 data" version="@VERSION@" profile = "20.01">
-    <description>none</description>
+    <description>read, crop, resample and write it as a raster stack.</description>
+    <macros>
+        <import>macro.xml</import>
+    </macros>
     <requirements>
         <requirement type="package" version="2.11.0">r-R.utils</requirement>
         <requirement type="package" version="1.2.3">r-jqr</requirement>
@@ -26,13 +29,12 @@
             '$source_s2'
             '$id'
             '$pwd'
-            '$output'
             '$output_refl'
             '$output_cloud'
         ]]>
     </command>
     <inputs>
-        <param name="input" type="data" multiple="true" label="Input data"/>
+        <param name="input" type="data" format="data" multiple="true" label="Input data"/>
         <param name="source_s2" type="select" label="Where does your data come from ?">
             <option value="SAFE">From Scihub</option>
             <option value="THEIA">From Theia</option>
@@ -42,19 +44,51 @@
         <param name="pwd" type="text" label="Write down your Scihub password"/>      
     </inputs>
     <outputs>
-        <data name="output" from_work_dir="truc.csv" format="csv" label="truc"/>
-        <collection type="list" name="output_refl">
-            <discover_datasets pattern="(?P&lt;designation&gt;.+)" directory="Reflectance" visible="false" format="binary,txt,xml"/>
+        <collection name="output_refl" type="list" label="Reflectance">
+            <discover_datasets pattern="(?P&lt;designation&gt;.+)" directory="results/Reflectance/" visible="false"/>
         </collection>
-        <collection type="list" name="output_cloud">
-            <discover_datasets pattern="(?P&lt;designation&gt;.+)" directory="CloudMask" visible="false" format="raw,txt"/>
+        <collection type="list" name="output_cloud" label="Cloud mask">
+            <discover_datasets pattern="(?P&lt;designation&gt;.+)" directory="results/CloudMask/" visible="false"/>
         </collection>
     </outputs>
     <tests>
         <test>
+           <param name="input" value="S2A_MSIL2A_20220601T065041_N0400_R077_T40MBV_20220601T093414.zip"/>
+            <param name="source_s2" value="SAFE"/>
+            <param name="id" value="identifiant"/>
+            <param name="pwd" value="password"/>
+            <output_collection name="output_refl" type="list" count="4"/>
+            <output_collection name="output_cloud" type="list" count="4"/>
         </test>
     </tests>
     <help><![CDATA[
-]]>    </help>
+==========================
+Preprocess Sentinel 2 data
+==========================
 
+
+**What it does**
+
+The goal of preprocS2 is to provide a common framework for the preprocessing of Level-2A Sentinel-2 images.
+Sentinel-2 L2A images can be produced or obtained from various data hubs or atmospheric correction methods. PreprocS2 provides a unique function to read, crop, resample the original image directory, and write it as a raster stack.
+
+**Input description**
+
+A zip folder with Sentinel 2 data. Must come from Scihub, Theia or Peps platforms.
+
++----------+
+|   ZIP    |
++==========+
+|  folder  |
++----------+
+|  ...     |
++----------+
+
+**Output**
+
+A data collection containing the refelctance data with a raster stack pile in BIL format (no extension), a header with the metadata (.hdr extension) and 2 other files in .xml.
+
+A dat collection containing the cloud mask with the 2 files for the raw data (.RAW) and 2 files containing the metadata (.hdr).
+    ]]>    </help>
+        <expand macro="SRS_S2ref"/>
 </tool>

@@ -1184,7 +1184,7 @@ save_cloud_s2 <- function(S2_stars, Cloud_path, S2source = 'SAFE',
 #' @importFrom stars write_stars st_apply
 #' @importFrom XML xml
 #' @export
-save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI',datatype='Int16',
+save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI', datatype='Int16',
                                 S2Sat = NULL, tile_S2 = NULL, dateAcq_S2 = NULL,
                                 MTD = NULL, MTD_MSI = NULL, MaxChunk = 256){
   # identify if S2A or S2B, if possible
@@ -1207,7 +1207,7 @@ save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI',datatype='Int
   }
 
   # apply offset when necessary
-  listBands_bis <-     c("B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12")
+  listBands_bis <- c("B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12")
   if (!is.null(MTD_MSI)){
     # read XML file containing info about geometry of acquisition
     # s2xml <- XML::xml(MTD)
@@ -1243,7 +1243,7 @@ save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI',datatype='Int
   Stars_Spectral$wavelength <- WL_s2[Stars_Spectral$bandname]
 
   SortedWL <- names(WL_s2)
-  Reorder <- match(SortedWL,Stars_Spectral$bandname)
+  Reorder <- match(SortedWL, Stars_Spectral$bandname)
   Elim <- which(is.na(Reorder))
   if (length(Elim)>0){
     Reorder <- Reorder[-Elim]
@@ -1251,7 +1251,7 @@ save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI',datatype='Int
   pathR <- S2_stars$attr[Reorder]
 
   names(pathR) <- NULL
-  S2_stars2 <- stars::read_stars(pathR,along='band',proxy=TRUE)
+  S2_stars2 <- stars::read_stars(pathR, along = 'band', proxy = TRUE)
   Stars_Spectral$bandname <- Stars_Spectral$bandname[Reorder]
   Stars_Spectral$wavelength <- Stars_Spectral$wavelength[Reorder]
 

@@ -29,6 +29,7 @@
             '$source_s2'
             '$id'
             '$pwd'
+            '$output'
             '$output_refl'
             '$output_cloud'
         ]]>
@@ -44,6 +45,7 @@
         <param name="pwd" type="text" label="Write down your Scihub password"/>      
     </inputs>
     <outputs>
+        <data name="output" from_work_dir="Mission.csv" format="csv" label="Mission source"/>
         <collection name="output_refl" type="list" label="Reflectance">
             <discover_datasets pattern="(?P&lt;designation&gt;.+)" directory="results/Reflectance/" visible="false"/>
         </collection>

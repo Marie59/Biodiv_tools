@@ -1,0 +1,71 @@
+<tool id="SRS_reading_data" name="Reading remote sensing data" version="@VERSION@" profile = "20.01">
+    <description>none</description>
+    <requirements>
+        <requirement type="package" version="0.62.0">r-matrixStats</requirement> 
+        <requirement type="package" version="2.11.0">r-R.utils</requirement>
+        <requirement type="package" version="1.25.0">r-future</requirement>
+        <requirement type="package" version="1.9.0">r-future.apply</requirement>
+        <requirement type="package" version="3.5_15">r-raster</requirement>
+        <requirement type="package" version="1.0_7">r-sf</requirement>
+        <requirement type="package" version="1.4_7">r-sp</requirement>
+        <requirement type="package" version="1.5_29">r-rgdal</requirement>
+        <requirement type="package" version="0.5_9">r-rgeos</requirement>
+        <requirement type="package" version="3.3.6">r-ggplot2</requirement>
+        <requirement type="package" version="0.31">r-xfun</requirement>
+        <requirement type="package" version="0.5_5">r-stars</requirement>
+        <requirement type="package" version="2.11.0">r-mapview</requirement>
+        <requirement type="package" version="0.1.0">r-leafpop</requirement>
+        <requirement type="package" version="1.1_3">r-rcolorbrewer</requirement>
+        <requirement type="package" version="2.0_1">r-labdsv</requirement>
+        <requirement type="package" version="2.3">r-gridextra</requirement>
+        <requirement type="package" version="1.14.2">r-data.table</requirement>
+        <requirement type="package" version="2.0.9">r-ecodist</requirement>
+        <requirement type="package" version="13.3">r-fields</requirement>
+        <requirement type="package" version="0.4.6">r-geometry</requirement>
+        <requirement type="package" version="1.0.2">r-matlab</requirement>
+        <requirement type="package" version="0.4_4">r-snow</requirement>
+        <requirement type="package" version="1.4.0">r-stringr</requirement>
+        <requirement type="package" version="2.6_2">r-vegan</requirement>
+        <requirement type="package" version="2.4.2">r-remotes</requirement> 
+        <requirement type="package" version="3.0.0">r-emstreer</requirement>
+        <requirement type="package" version="1.6.1">r-mmand</requirement>
+        <requirement type="package" version="1.0">r-dissutils</requirement>  
+        <requirement type="package" version="3.2.2">r-filesstrings</requirement>  
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[ 
+        ls > 1 &&
+        cp '$input_raster' '${input_raster.element_identifier}' &&
+        cp '$input_header' '${input_header.element_identifier}' &&
+        Rscript
+            '$__tool_directory__/data_reading.r'
+            '$input_raster.element_identifier'
+            '$input_header.element_identifier'
+            '$output_shannon'
+            '$output_alpha'
+            '$output_beta'
+            '$plots'
+        ]]>
+    </command>
+    <inputs>
+        <param name="input_raster" type="data" format="binary,txt" label="Input raster"/>
+        <param name="input_header" type="data" format="txt" label="Input raster header"/>
+    </inputs>
+    <outputs>
+        <data name="output_shannon" from_work_dir="ShannonIndex.csv" format="csv" label="Shannon Index">
+        </data>
+        <data name="output_alpha" from_work_dir="AlphaDiversity.csv" format="csv" label="Alpha diversity">
+        </data>
+        <data name="output_beta" from_work_dir="BrayCurtis.csv" format="csv" label="Beta diversity">
+        </data>
+        <collection type="list" name="plots">
+            <discover_datasets pattern="(?P&lt;designation&gt;.+)\.png" visible="false" format="png"/>
+        </collection>
+    </outputs>
+    <tests>
+        <test>
+        </test>
+    </tests>
+    <help><![CDATA[
+]]>    </help>
+
+</tool>

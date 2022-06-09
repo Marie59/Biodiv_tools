@@ -27,8 +27,6 @@
             '$input'
             '$__tool_directory__/Lib_preprocess_S2.r'
             '$source_s2'
-            '$id'
-            '$pwd'
             '$output'
             '$output_refl'
             '$output_cloud'
@@ -37,12 +35,11 @@
     <inputs>
         <param name="input" type="data" format="data" multiple="true" label="Input data"/>
         <param name="source_s2" type="select" label="Where does your data come from ?">
-            <option value="SAFE">From Scihub</option>
+            <option value="SAFE">From Scihub or Peps</option>
             <option value="THEIA">From Theia</option>
-            <option value="LaSRC">From Peps</option>
         </param> 
-        <param name="id" type="text" label="Write down your Scihub identifier"/>
-        <param name="pwd" type="text" label="Write down your Scihub password"/>      
+        <!--<param name="id" type="text" label="Write down your Scihub identifier"/>
+        <param name="pwd" type="text" label="Write down your Scihub password"/>-->      
     </inputs>
     <outputs>
         <data name="output" from_work_dir="Mission.csv" format="csv" label="Mission source"/>

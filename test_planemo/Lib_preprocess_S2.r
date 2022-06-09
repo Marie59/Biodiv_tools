@@ -71,20 +71,20 @@ check_S2mission <- function(S2Sat, tile_S2, dateAcq_S2){
       message('Defining central wavelength of spectral bands based on S2A')
       s2mission <- '2A'
     }
-  } else if (!is.null(tile_S2) & !is.null(dateAcq_S2)){
-    if (sen2r::check_scihub_connection()==T){
-      tileOK <- sen2r::s2_list(tile = tile_S2,time_interval = as.Date(dateAcq_S2))
-      s2mission <- sen2r::safe_getMetadata(tileOK,"mission")[[1]]
-      if (is.null(s2mission)){
-        message('Could not identify if image from Sentinel-2A or -2B')
-        message('Defining central wavelength of spectral bands based on S2A')
-        s2mission <- '2A'
-      }
-    } else {
-      message('Could not identify if image from Sentinel-2A or -2B')
-      message('Defining central wavelength of spectral bands based on S2A')
-      s2mission <- '2A'
-    }
+  #} else if (!is.null(tile_S2) & !is.null(dateAcq_S2)){
+    #if (sen2r::check_scihub_connection()==T){
+      #tileOK <- sen2r::s2_list(tile = tile_S2,time_interval = as.Date(dateAcq_S2))
+      #s2mission <- sen2r::safe_getMetadata(tileOK,"mission")[[1]]
+      #if (is.null(s2mission)){
+       # message('Could not identify if image from Sentinel-2A or -2B')
+        #message('Defining central wavelength of spectral bands based on S2A')
+        #s2mission <- '2A'
+      #}
+    #} else {
+     # message('Could not identify if image from Sentinel-2A or -2B')
+      #message('Defining central wavelength of spectral bands based on S2A')
+      #s2mission <- '2A'
+    #}
   } else {
     message('Could not identify if image from Sentinel-2A or -2B')
     message('Defining central wavelength of spectral bands based on S2A')
@@ -137,6 +137,7 @@ extract_from_S2_L2A <- function(Path_dir_S2, path_vector=NULL, S2source='SAFE',
                            S2source = S2source,
                            resolution = resolution,
                            fre_sre = fre_sre)
+
   if (length(S2_Bands$S2Bands_10m)>0){
     rastmp <- raster::raster(S2_Bands$S2Bands_10m[[1]])
   } else if (length(S2_Bands$S2Bands_20m)>0){
@@ -152,8 +153,10 @@ extract_from_S2_L2A <- function(Path_dir_S2, path_vector=NULL, S2source='SAFE',
   }
   # Extract data corresponding to the vector footprint (if provided) & resample data if needed
   if (length(S2_Bands$S2Bands_10m)>0){
+
     Stack_10m <- read_S2bands(S2_Bands = S2_Bands$S2Bands_10m, path_vector = path_vector,
                               resampling = 1, interpolation = interpolation)
+
   }
   if (length(S2_Bands$S2Bands_20m)>0){
     if (resolution==10 && S2source!='LaSRC'){
@@ -452,8 +455,8 @@ get_S2_bands_from_Sen2Cor <- function(Path_dir_S2, resolution=10){
 #' @return ListBands list. contains path for spectral bands corresponding to 10m and 20m resolution, as well name of as granule
 #' @export
 get_S2_bands_from_LaSRC <- function(Path_dir_S2, resolution=10){
-
-  # get granule directory & path for corresponding metadata XML file
+  
+ # get granule directory & path for corresponding metadata XML file
   granule <- Path_dir_S2
   MTDfile <- file.path(granule,'MTD_TL.xml')
   if (file.exists(file.path(Path_dir_S2,'MTD_MSIL1C.xml'))){
@@ -472,13 +475,26 @@ get_S2_bands_from_LaSRC <- function(Path_dir_S2, resolution=10){
                                                  list.files(Path_dir_S2,
                                                             pattern = paste(B10m[i],'.tif',sep = '')))
   }
+
+  # get metadata file containing offset
+  MTD_LaSRC <- str_subset(list.files(Path_dir_S2,pattern = 'S2A'), ".xml$")
+  if (file.exists(file.path(Path_dir_S2,MTD_LaSRC))){
+    metadata_LaSRC <- file.path(Path_dir_S2,MTD_LaSRC)
+  } else {
+    metadata_LaSRC <- NULL
+  }
   # get cloud mask
   Cloud <- 'CLM'
   S2Bands_10m[['Cloud']] <- file.path(Path_dir_S2,list.files(Path_dir_S2,pattern = Cloud))
-  ListBands <- list('S2Bands_10m'=S2Bands_10m, 'S2Bands_20m'=S2Bands_20m,
-                    'GRANULE'=granule, 'metadata'=MTDfile, 'metadata_MSI'=MTD_MSI_file)
+  ListBands <- list('S2Bands_10m' = S2Bands_10m,
+                    'S2Bands_20m' = S2Bands_20m,
+                    'GRANULE' = granule,
+                    'metadata' = MTDfile,
+                    'metadata_MSI' = MTD_MSI_file,
+                    'metadata_LaSRC' = metadata_LaSRC)
   return(ListBands)
 }
+
 
 #' This function returns path for the spectral bands in THEIA directory
 #'

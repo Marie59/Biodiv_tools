@@ -21,23 +21,23 @@
 #' @importFrom utils read.table
 #' @importFrom raster hdr raster
 #' @export
-adjust_ENVI_hdr <- function(dsn, Bands, sensor = 'Unknown', Stretch = FALSE){
+adjust_ENVI_hdr <- function(dsn, Bands, sensor = 'Unknown', Stretch = FALSE) {
 
   # Edit HDR file to add metadata
   HDR <- read_ENVI_header(get_HDR_name(dsn))
   HDR$`band names` <- Bands$bandname
-  if (length(Bands$wavelength)==length(Bands$bandname)){
+  if (length(Bands$wavelength) == length(Bands$bandname)) {
     HDR$wavelength <- Bands$wavelength
-  } else {
+  }else{
     HDR$wavelength <- NULL
   }
-  if (Stretch==TRUE){
+  if (Stretch == TRUE) {
     HDR$`default stretch` <- '0.000000 1000.000000 linear'
   }
   HDR$`z plot range` <- NULL
   HDR$`data ignore value` <- '-Inf'
   HDR$`sensor type` <- sensor
-  write_ENVI_header(HDR = HDR,HDRpath = get_HDR_name(dsn))
+  write_ENVI_header(HDR = HDR, HDRpath = get_HDR_name(dsn))
 
   # remove unnecessary files
   File2Remove <- paste(dsn, ".aux.xml", sep = "")
@@ -58,34 +58,34 @@ adjust_ENVI_hdr <- function(dsn, Bands, sensor = 'Unknown', Stretch = FALSE){
 #' @return s2mission character. name of the S2 mission (2A or 2B)
 #' @importFrom sen2r safe_getMetadata check_scihub_connection s2_list
 #' @export
-check_S2mission <- function(S2Sat, tile_S2, dateAcq_S2){
+check_S2mission <- function(S2Sat, tile_S2, dateAcq_S2) {
 
   # is mission already defined by user?
-  if (!is.null(S2Sat)){
-    if (S2Sat=='2A'){
+  if (!is.null(S2Sat)) {
+    if (S2Sat == '2A') {
       s2mission <- '2A'
-    } else if (S2Sat=='2B'){
+    }else if (S2Sat == '2B') {
       s2mission <- '2B'
-    } else {
+    }else{
       message('Could not identify if image from Sentinel-2A or -2B')
       message('Defining central wavelength of spectral bands based on S2A')
       s2mission <- '2A'
     }
-  #} else if (!is.null(tile_S2) & !is.null(dateAcq_S2)){
-    #if (sen2r::check_scihub_connection()==T){
-      #tileOK <- sen2r::s2_list(tile = tile_S2,time_interval = as.Date(dateAcq_S2))
-      #s2mission <- sen2r::safe_getMetadata(tileOK,"mission")[[1]]
-      #if (is.null(s2mission)){
-       # message('Could not identify if image from Sentinel-2A or -2B')
-        #message('Defining central wavelength of spectral bands based on S2A')
-        #s2mission <- '2A'
-      #}
-    #} else {
-     # message('Could not identify if image from Sentinel-2A or -2B')
-      #message('Defining central wavelength of spectral bands based on S2A')
-      #s2mission <- '2A'
-    #}
-  } else {
+#  } else if (!is.null(tile_S2) & !is.null(dateAcq_S2)){
+#    if (sen2r::check_scihub_connection()==T){
+#      tileOK <- sen2r::s2_list(tile = tile_S2,time_interval = as.Date(dateAcq_S2))
+#      s2mission <- sen2r::safe_getMetadata(tileOK,"mission")[[1]]
+#      if (is.null(s2mission)){
+#        message('Could not identify if image from Sentinel-2A or -2B')
+#        message('Defining central wavelength of spectral bands based on S2A')
+#        s2mission <- '2A'
+#      }
+#    } else {
+#      message('Could not identify if image from Sentinel-2A or -2B')
+#      message('Defining central wavelength of spectral bands based on S2A')
+#      s2mission <- '2A'
+#    }
+  }else{
     message('Could not identify if image from Sentinel-2A or -2B')
     message('Defining central wavelength of spectral bands based on S2A')
     s2mission <- '2A'
@@ -130,85 +130,83 @@ dir_size <- function(path, recursive = TRUE) {
 #' @importFrom raster raster
 #' @importFrom tools file_path_sans_ext file_ext
 #' @export
-extract_from_S2_L2A <- function(Path_dir_S2, path_vector=NULL, S2source='SAFE',
-                                resolution=10, interpolation='bilinear', fre_sre = 'FRE'){
+extract_from_S2_L2A <- function(Path_dir_S2, path_vector = NULL, S2source = 'SAFE',
+                                resolution = 10, interpolation = 'bilinear', fre_sre = 'FRE') {
   # Get list of paths corresponding to S2 bands and depending on S2 directory
   S2_Bands <- get_S2_bands(Path_dir_S2 = Path_dir_S2,
                            S2source = S2source,
                            resolution = resolution,
                            fre_sre = fre_sre)
 
-  if (length(S2_Bands$S2Bands_10m)>0){
+  if (length(S2_Bands$S2Bands_10m) > 0) {
     rastmp <- raster::raster(S2_Bands$S2Bands_10m[[1]])
-  } else if (length(S2_Bands$S2Bands_20m)>0){
+  } else if (length(S2_Bands$S2Bands_20m) > 0) {
     rastmp <- raster::raster(S2_Bands$S2Bands_20m[[1]])
   }
   # check if vector and raster share the same projection. if not, re-project vector
-  if (!is.null(path_vector)){
+  if (!is.null(path_vector)) {
     raster_proj <- raster::projection(rastmp)
-    path_vector_reproj <- paste(tools::file_path_sans_ext(path_vector),'_reprojected.shp',sep = '')
+    path_vector_reproj <- paste(tools::file_path_sans_ext(path_vector), '_reprojected.shp', sep = '')
     path_vector <- reproject_shp(path_vector_init = path_vector,
                                  newprojection = raster_proj,
                                  path_vector_reproj = path_vector_reproj)
   }
   # Extract data corresponding to the vector footprint (if provided) & resample data if needed
-  if (length(S2_Bands$S2Bands_10m)>0){
-
+  if (length(S2_Bands$S2Bands_10m) > 0) {
     Stack_10m <- read_S2bands(S2_Bands = S2_Bands$S2Bands_10m, path_vector = path_vector,
                               resampling = 1, interpolation = interpolation)
-
   }
-  if (length(S2_Bands$S2Bands_20m)>0){
-    if (resolution==10 && S2source!='LaSRC'){
+  if (length(S2_Bands$S2Bands_20m) > 0) {
+    if (resolution == 10 && S2source != 'LaSRC') {
       resampling <- 2
-    } else {
+    }else{
       resampling <- 1
     }
     Stack_20m <- read_S2bands(S2_Bands = S2_Bands$S2Bands_20m, path_vector = path_vector,
                               resampling = resampling, interpolation = interpolation)
   }
   # get full stack including 10m and 20m spatial resolution
-  if (length(S2_Bands$S2Bands_10m)>0 & length(S2_Bands$S2Bands_20m)>0 ){
+  if (length(S2_Bands$S2Bands_10m) > 0 & length(S2_Bands$S2Bands_20m) > 0 ) {
     DiffXstart <- attributes(Stack_10m)$dimensions[[1]]$from - attributes(Stack_20m)$dimensions[[1]]$from
     DiffXstop <- attributes(Stack_10m)$dimensions[[1]]$to - attributes(Stack_20m)$dimensions[[1]]$to
     DiffYstart <- attributes(Stack_10m)$dimensions[[2]]$from - attributes(Stack_20m)$dimensions[[2]]$from
     DiffYstop <- attributes(Stack_10m)$dimensions[[2]]$to - attributes(Stack_20m)$dimensions[[2]]$to
-    if (!DiffXstop==0){
+    if (!DiffXstop == 0) {
       # size of 20m > size of 10m --> reduce 20m
       # size of 10m > size of 20m --> reduce 10m
-      if(DiffXstop>0){
-        Stack_10m <- Stack_10m[,1:(dim(Stack_10m)[1]-DiffXstop),,]
-      } else if(DiffXstop<0){
-        Stack_20m <- Stack_20m[,1:(dim(Stack_20m)[1]+DiffXstop),,]
+      if (DiffXstop > 0) {
+        Stack_10m <- Stack_10m[, 1:(dim(Stack_10m)[1]-DiffXstop), , ]
+      }else if (DiffXstop < 0) {
+        Stack_20m <- Stack_20m[, 1:(dim(Stack_20m)[1]+DiffXstop), , ]
       }
     }
-    if (!DiffYstop==0){
-      if(DiffYstop>0){
-        Stack_10m <- Stack_10m[,,1:(dim(Stack_10m)[2]-DiffYstop),]
-      } else if(DiffYstop<0){
-        Stack_20m <- Stack_20m[,,1:(dim(Stack_20m)[2]+DiffYstop),]
+    if (!DiffYstop == 0) {
+      if (DiffYstop > 0) {
+        Stack_10m <- Stack_10m[, , 1:(dim(Stack_10m)[2]-DiffYstop), ]
+      }else if (DiffYstop < 0) {
+        Stack_20m <- Stack_20m[, , 1:(dim(Stack_20m)[2]+DiffYstop), ]
       }
     }
-    if (!DiffXstart==0){
-      if(DiffXstart>0){
-        Stack_20m <- Stack_20m[,(1+DiffXstart):dim(Stack_20m)[1],,]
-      } else if(DiffXstart<0){
-        Stack_10m <- Stack_10m[,(1-DiffXstart):dim(Stack_10m)[1],,]
+    if (!DiffXstart == 0) {
+      if (DiffXstart > 0){
+        Stack_20m <- Stack_20m[, (1+DiffXstart):dim(Stack_20m)[1], , ]
+      }else if (DiffXstart < 0) {
+        Stack_10m <- Stack_10m[, (1-DiffXstart):dim(Stack_10m)[1], , ]
       }
     }
-    if (!DiffYstart==0){
-      if(DiffYstart>0){
-        Stack_20m <- Stack_20m[,,(1+DiffYstart):dim(Stack_20m)[2],]
-      } else if(DiffYstart<0){
-        Stack_10m <- Stack_10m[,,(1-DiffYstart):dim(Stack_10m)[2],]
+    if (!DiffYstart == 0) {
+      if (DiffYstart > 0) {
+        Stack_20m <- Stack_20m[, , (1+DiffYstart):dim(Stack_20m)[2], ]
+      }else if (DiffYstart < 0) {
+        Stack_10m <- Stack_10m[, , (1-DiffYstart):dim(Stack_10m)[2], ]
       }
     }
     # reorder bands with increasing wavelength
     S2Bands <- c("B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12", "Cloud")
-    NameBands <- c(names(S2_Bands$S2Bands_10m),names(S2_Bands$S2Bands_20m))
-    reorder_bands <- match(S2Bands,NameBands)
+    NameBands <- c(names(S2_Bands$S2Bands_10m), names(S2_Bands$S2Bands_20m))
+    reorder_bands <- match(S2Bands, NameBands)
     NameBands <- NameBands[reorder_bands]
-    ListFiles <- c(Stack_10m$attr,Stack_20m$attr)[reorder_bands]
+    ListFiles <- c(Stack_10m$attr, Stack_20m$attr)[reorder_bands]
 
     # adjust size to initial vector footprint without buffer
     # --> buffer is needed in order to ensure that extraction following
@@ -228,15 +226,15 @@ extract_from_S2_L2A <- function(Path_dir_S2, path_vector=NULL, S2source='SAFE',
                                   RasterIO = list(nXOff = nXOff, nYOff = nYOff,
                                                   nXSize = nXSize, nYSize = nYSize,
                                                   nBufXSize = nBufXSize, nBufYSize = nBufYSize,
-                                                  resample='nearest_neighbour'),proxy = TRUE)
+                                                  resample = 'nearest_neighbour'), proxy = TRUE)
     names(S2_Stack$attr) <- NameBands
     # S2_Stack <- c(Stack_10m,Stack_20m,along='band')
     # S2_Stack <- S2_Stack[,,,reorder_bands]
-  } else if (length(S2_Bands$S2Bands_10m)>0){
+  }else if (length(S2_Bands$S2Bands_10m) > 0) {
     S2_Stack <- Stack_10m
     NameBands <- names(S2_Bands$S2Bands_10m)
     names(S2_Stack$attr) <- NameBands
-  } else if (length(S2_Bands$S2Bands_20m)>0){
+  }else if (length(S2_Bands$S2Bands_20m) > 0) {
     S2_Stack <- Stack_20m
     NameBands <- names(S2_Bands$S2Bands_20m)
     names(S2_Stack$attr) <- NameBands
@@ -252,7 +250,7 @@ extract_from_S2_L2A <- function(Path_dir_S2, path_vector=NULL, S2source='SAFE',
   # } else {
   #   S2_Stack <- Stack_20m
   # }
-  ListOut <- list('S2_Stack'=S2_Stack,'S2_Bands'=S2_Bands, 'path_vector'=path_vector,
+  ListOut <- list('S2_Stack' = S2_Stack, 'S2_Bands' = S2_Bands, 'path_vector' = path_vector,
                   'NameBands' = NameBands)
   return(ListOut)
 }
@@ -265,14 +263,14 @@ extract_from_S2_L2A <- function(Path_dir_S2, path_vector=NULL, S2source='SAFE',
 #'
 #' @return BB_XYcoords list. Coordinates (in pixels) of the upper/lower right/left corners of bounding box
 #' @export
-get_BB <- function(path_raster,path_vector=NULL,Buffer = 0){
+get_BB <- function (path_raster, path_vector = NULL, Buffer = 0) {
 
-  if (!is.null(path_vector)){
+  if (!is.null(path_vector)) {
     # get bounding box with a 50m buffer in order to allow for interpolation
     BB_XYcoords <- get_BB_from_Vector(path_raster = path_raster,
                                       path_vector = path_vector,
                                       Buffer = Buffer)
-  } else if (is.null(path_vector)){
+  }else if (is.null(path_vector)) {
     BB_XYcoords <- get_BB_from_fullImage(path_raster)
   }
   return(BB_XYcoords)
@@ -285,14 +283,14 @@ get_BB <- function(path_raster,path_vector=NULL,Buffer = 0){
 #' @return BB_XYcoords list. Coordinates (in pixels) of the upper/lower right/left corners of bounding box
 #' @importFrom raster raster
 #' @export
-get_BB_from_fullImage <- function(path_raster){
+get_BB_from_fullImage <- function (path_raster) {
   # get raster coordinates corresponding to Full image
   rasterobj <- raster::raster(path_raster)
   BB_XYcoords <- list()
-  BB_XYcoords[['UL']] <- data.frame('row'=1,'col'=1)
-  BB_XYcoords[['UR']] <- data.frame('row'=1,'col'=dim(rasterobj)[2])
-  BB_XYcoords[['LL']] <- data.frame('row'=dim(rasterobj)[1],'col'=1)
-  BB_XYcoords[['LR']] <- data.frame('row'=dim(rasterobj)[1],'col'=dim(rasterobj)[2])
+  BB_XYcoords[['UL']] <- data.frame('row' = 1, 'col' = 1)
+  BB_XYcoords[['UR']] <- data.frame('row' = 1, 'col' = dim(rasterobj)[2])
+  BB_XYcoords[['LL']] <- data.frame('row' = dim(rasterobj)[1], 'col' = 1)
+  BB_XYcoords[['LR']] <- data.frame('row' = dim(rasterobj)[1], 'col' = dim(rasterobj)[2])
   return(BB_XYcoords)
 }
 
@@ -309,13 +307,13 @@ get_BB_from_fullImage <- function(path_raster){
 #' @importFrom raster projection extract extent raster
 #' @importFrom methods as
 #' @export
-get_BB_from_Vector <- function(path_raster,path_vector,Buffer = 0){
+get_BB_from_Vector <- function (path_raster, path_vector, Buffer = 0) {
 
   Raster <- raster::raster(path_raster)
   # xmin <- xmax <- ymin <- ymax <- c()
   # extract BB coordinates from vector
-  BB_vector <- rgeos::gBuffer(spgeom = as(st_read(dsn = path_vector,quiet = T), "Spatial"),
-                              width=Buffer,byid = TRUE)
+  BB_vector <- rgeos::gBuffer(spgeom = as(st_read(dsn = path_vector, quiet = T), "Spatial"),
+                              width = Buffer, byid = TRUE)
   # extract BB coordinates from raster
   BB_raster <- rgeos::bbox2SP(bbox = bbox(Raster))
   # compute intersection
@@ -333,13 +331,13 @@ get_BB_from_Vector <- function(path_raster,path_vector,Buffer = 0){
   Corners[['LL']] <- sp::SpatialPoints(coords = cbind(xmin, ymin))
   raster::projection(Corners[['UL']]) <- raster::projection(Corners[['UR']]) <-
     raster::projection(Corners[['LL']]) <- raster::projection(Corners[['LR']]) <-
-    raster::projection(st_read(dsn = path_vector,quiet = T))
+    raster::projection(st_read(dsn = path_vector, quiet = T))
   # get coordinates for corners of bounding box
   BB_XYcoords <- list()
-  for (corner in names(Corners)){
-    ex.df <- as.data.frame(raster::extract(Raster,Corners[[corner]],cellnumbers=T))
-    ColRow <- ind2sub(Raster,ex.df$cell)
-    BB_XYcoords[[corner]] <- data.frame('row'=ColRow$row,'col'=ColRow$col)
+  for (corner in names(Corners)) {
+    ex.df <- as.data.frame(raster::extract(Raster, Corners[[corner]], cellnumbers = T))
+    ColRow <- ind2sub(Raster, ex.df$cell)
+    BB_XYcoords[[corner]] <- data.frame('row' = ColRow$row, 'col' = ColRow$col)
   }
   return(BB_XYcoords)
 }
@@ -351,14 +349,14 @@ get_BB_from_Vector <- function(path_raster,path_vector,Buffer = 0){
 #' @return corresponding hdr
 #' @import tools
 #' @export
-get_HDR_name <- function(ImPath) {
+get_HDR_name <- function (ImPath) {
   if (tools::file_ext(ImPath) == "") {
     ImPathHDR <- paste(ImPath, ".hdr", sep = "")
-  } else if (tools::file_ext(ImPath) == "bil") {
+  }else if (tools::file_ext(ImPath) == "bil") {
     ImPathHDR <- gsub(".bil", ".hdr", ImPath)
-  } else if (tools::file_ext(ImPath) == "zip") {
+  }else if (tools::file_ext(ImPath) == "zip") {
     ImPathHDR <- gsub(".zip", ".hdr", ImPath)
-  } else {
+  }else {
     ImPathHDR <- paste(tools::file_path_sans_ext(ImPath), ".hdr", sep = "")
   }
 
@@ -379,24 +377,25 @@ get_HDR_name <- function(ImPath) {
 #'
 #' @return ListBands list. contains path for spectral bands corresponding to 10m and 20m resolution
 #' @export
-get_S2_bands <- function(Path_dir_S2, S2source = 'SAFE', resolution = 10, fre_sre = 'FRE'){
+get_S2_bands <- function (Path_dir_S2, S2source = 'SAFE', resolution = 10, fre_sre = 'FRE') {
 
-  if (S2source=='SAFE' | S2source=='Sen2Cor'){
-    ListBands <- get_S2_bands_from_Sen2Cor(Path_dir_S2 = Path_dir_S2,resolution = resolution)
-  } else if (S2source=='THEIA'){
-    ListBands <- get_S2_bands_from_THEIA(Path_dir_S2 = Path_dir_S2,resolution = resolution,
+  if (S2source == 'SAFE' | S2source == 'Sen2Cor') {
+    ListBands <- get_S2_bands_from_Sen2Cor(Path_dir_S2 = Path_dir_S2, resolution = resolution)
+  }else if (S2source == 'THEIA') {
+    ListBands <- get_S2_bands_from_THEIA(Path_dir_S2 = Path_dir_S2, resolution = resolution,
                                          fre_sre = fre_sre)
-  } else if (S2source=='LaSRC'){
-    ListBands <- get_S2_bands_from_LaSRC(Path_dir_S2 = Path_dir_S2,resolution = resolution)
-  } else {
+  }else if (S2source=='LaSRC') {
+    ListBands <- get_S2_bands_from_LaSRC(Path_dir_S2 = Path_dir_S2, resolution = resolution)
+  }else {
     message('The data source (Atmospheric correction) for Sentinel-2 image is unknown')
     message('Please provide S2 images from one of the following data sources:')
     message('- LaSRC (atmospheric correction: LaSRC)')
     message('- THEIA (atmospheric correction: MAJA)')
     message('- SAFE (atmospheric correction: Sen2Cor)')
-    S2Bands_10m <- S2Bands_20m <- granule <- MTDfile <- metadata_MSI <- NULL
-    ListBands <- list('S2Bands_10m'=S2Bands_10m,'S2Bands_20m'=S2Bands_20m,'GRANULE'=granule,
-                      'metadata'=MTDfile,'metadata_MSI'=metadata_MSI)
+    S2Bands_10m <- S2Bands_20m <- granule <- MTDfile <- metadata_MSI <- metadata_LaSRC <- NULL
+    ListBands <- list('S2Bands_10m' = S2Bands_10m, 'S2Bands_20m' = S2Bands_20m, 'GRANULE' = granule,
+                      'metadata'= MTDfile, 'metadata_MSI' = metadata_MSI,
+                      'metadata_LaSRC'= metadata_LaSRC)
   }
   return(ListBands)
 }
@@ -408,19 +407,18 @@ get_S2_bands <- function(Path_dir_S2, S2source = 'SAFE', resolution = 10, fre_sr
 #'
 #' @return ListBands list. contains path for spectral bands corresponding to 10m and 20m resolution, as well name of as granule
 #' @export
-get_S2_bands_from_Sen2Cor <- function(Path_dir_S2, resolution=10){
+get_S2_bands_from_Sen2Cor <- function(Path_dir_S2, resolution=10) {
   # build path for all bands
-  if (resolution == 10){
-    B10m <- c('B02','B03','B04','B08')
-    B20m <- c('B05','B06','B07','B8A','B11','B12')
-  } else {
+  if (resolution == 10) {
+    B10m <- c('B02', 'B03', 'B04', 'B08')
+    B20m <- c('B05', 'B06', 'B07', 'B8A', 'B11', 'B12')
+  }else {
     B10m <- c()
-    B20m <- c('B02','B03','B04','B05','B06','B07','B08','B8A','B11','B12')
+    B20m <- c('B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B8A', 'B11', 'B12')
   }
   # get granule directory & path for corresponding metadata XML file
   granule <- list.dirs(list.dirs(Path_dir_S2,recursive = FALSE)[grep(pattern = 'GRANULE',
                                                                      x = list.dirs(Path_dir_S2,recursive = FALSE))],recursive = FALSE)
-
   MTDfile <- file.path(granule,'MTD_TL.xml')
   if (file.exists(file.path(Path_dir_S2,'MTD_MSIL2A.xml'))){
     MTD_MSI_file <- file.path(Path_dir_S2,'MTD_MSIL2A.xml')
@@ -442,8 +440,12 @@ get_S2_bands_from_Sen2Cor <- function(Path_dir_S2, resolution=10){
   Cloud <- 'MSK_CLDPRB_20m'
   Cloud_20m_dir <- file.path(granule,'QI_DATA')
   S2Bands_20m[['Cloud']] <- file.path(Cloud_20m_dir,list.files(Cloud_20m_dir,pattern = Cloud))
-  ListBands <- list('S2Bands_10m'=S2Bands_10m,'S2Bands_20m'=S2Bands_20m,'GRANULE'=granule,
-                    'metadata'=MTDfile,'metadata_MSI'=MTD_MSI_file)
+  ListBands <- list('S2Bands_10m' = S2Bands_10m,
+                    'S2Bands_20m' = S2Bands_20m,
+                    'GRANULE' = granule,
+                    'metadata' = MTDfile,
+                    'metadata_MSI' = MTD_MSI_file,
+                    'metadata_LaSRC' = NULL)
   return(ListBands)
 }
 
@@ -453,10 +455,11 @@ get_S2_bands_from_Sen2Cor <- function(Path_dir_S2, resolution=10){
 #' @param resolution numeric. spatial resolution of the final image: 10m or 20m
 #'
 #' @return ListBands list. contains path for spectral bands corresponding to 10m and 20m resolution, as well name of as granule
+#' @importFrom stringr str_subset
 #' @export
 get_S2_bands_from_LaSRC <- function(Path_dir_S2, resolution=10){
-  
- # get granule directory & path for corresponding metadata XML file
+
+  # get granule directory & path for corresponding metadata XML file
   granule <- Path_dir_S2
   MTDfile <- file.path(granule,'MTD_TL.xml')
   if (file.exists(file.path(Path_dir_S2,'MTD_MSIL1C.xml'))){
@@ -477,7 +480,7 @@ get_S2_bands_from_LaSRC <- function(Path_dir_S2, resolution=10){
   }
 
   # get metadata file containing offset
-  MTD_LaSRC <- str_subset(list.files(Path_dir_S2,pattern = 'S2A'), ".xml$")
+  MTD_LaSRC <- str_subset(list.files(Path_dir_S2,pattern = 'S2'), ".xml$")
   if (file.exists(file.path(Path_dir_S2,MTD_LaSRC))){
     metadata_LaSRC <- file.path(Path_dir_S2,MTD_LaSRC)
   } else {
@@ -494,7 +497,6 @@ get_S2_bands_from_LaSRC <- function(Path_dir_S2, resolution=10){
                     'metadata_LaSRC' = metadata_LaSRC)
   return(ListBands)
 }
-
 
 #' This function returns path for the spectral bands in THEIA directory
 #'
@@ -577,10 +579,11 @@ get_S2_level <- function(prodName){
 #' @param prodName character. original name for the S2 image
 #'
 #' @return TileName character
+#' @importFrom tools file_path_sans_ext
 #' @export
 get_tile <- function(prodName){
   prodName <- basename(prodName)
-  TileName <- gsub("_.*", "", gsub(".*_T", "", prodName))
+  TileName <- tools::file_path_sans_ext(gsub("_.*", "", gsub(".*_T", "", prodName)))
   return(TileName)
 }
 
@@ -592,7 +595,8 @@ get_tile <- function(prodName){
 #' @export
 get_date <- function(prodName){
   prodName <- basename(prodName)
-  DateAcq <- gsub("T.*", "", gsub(".*L1C_", "", gsub(".*L2A_", "", prodName)))
+  # DateAcq <- gsub("T.*", "", gsub(".*L1C_", "", gsub(".*L2A_", "", prodName)))
+  DateAcq <- as.Date(gsub("T.*", "", gsub(".*_20", "20", prodName)),format = "%Y%m%d")
   return(DateAcq)
 }
 
@@ -915,6 +919,7 @@ read_ENVI_header <- function(HDRpath) {
 #' @importFrom stars read_stars
 #' @importFrom sf st_bbox st_read st_crop
 #' @export
+
 read_S2bands <- function(S2_Bands, path_vector = NULL,
                          resampling = 1, interpolation = 'bilinear'){
   # get bounding box corresponding to footprint of image or image subset
@@ -1194,15 +1199,17 @@ save_cloud_s2 <- function(S2_stars, Cloud_path, S2source = 'SAFE',
 #' @param dateAcq_S2 double. date of acquisition
 #' @param MTD character. path for metadata file
 #' @param MTD_MSI character. path for metadata MSI file
+#' @param MTD_LaSRC character. path for metadata LaSRC file
 #' @param MaxChunk numeric. Size of individual chunks to be written (in Mb)
 #'
 #' @return None
 #' @importFrom stars write_stars st_apply
 #' @importFrom XML xml
 #' @export
-save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI', datatype='Int16',
+save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI',datatype='Int16',
                                 S2Sat = NULL, tile_S2 = NULL, dateAcq_S2 = NULL,
-                                MTD = NULL, MTD_MSI = NULL, MaxChunk = 256){
+                                MTD = NULL, MTD_MSI = NULL, MTD_LaSRC = NULL,
+                                MaxChunk = 256){
   # identify if S2A or S2B, if possible
   s2mission <- check_S2mission(S2Sat = S2Sat, tile_S2 = tile_S2, dateAcq_S2 = dateAcq_S2)
 
@@ -1223,8 +1230,8 @@ save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI', datatype='In
   }
 
   # apply offset when necessary
-  listBands_bis <- c("B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12")
-  if (!is.null(MTD_MSI)){
+  listBands_bis <-     c("B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12")
+  if (!is.null(MTD_MSI) & is.null(MTD_LaSRC)){
     # read XML file containing info about geometry of acquisition
     # s2xml <- XML::xml(MTD)
     s2xml <- XML::xmlToList(MTD_MSI)
@@ -1245,6 +1252,24 @@ save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI', datatype='In
                            'Offset' =0)
       BOA_QuantVal <- 10000
     }
+  } else if (!is.null(MTD_LaSRC)){
+    # read XML file containing info about geometry of acquisition
+    # s2xml <- XML::xml(MTD)
+    s2xml <- XML::xmlToList(MTD_LaSRC)
+    attributes_LaSRC <- s2xml$bands[[14]]$.attrs
+    attributes_LaSRC_df <- data.frame(attributes_LaSRC)
+    if (match('add_offset',rownames(attributes_LaSRC_df))>0 & match('scale_factor',rownames(attributes_LaSRC_df))>0){
+      XML_Offset <- as.numeric(attributes_LaSRC[['add_offset']])
+      BOA_QuantVal <- 1/as.numeric(attributes_LaSRC[['scale_factor']])
+      Offset <- data.frame('BandName' = listBands_bis,
+                           'BandID' = c(1,2,3,4,5,6,7,8,11,12),
+                           'Offset' = XML_Offset)
+    } else {
+      Offset <- data.frame('BandName' = listBands_bis,
+                           'BandID' = c(1,2,3,4,5,6,7,8,11,12),
+                           'Offset' =0)
+      BOA_QuantVal <- 10000
+    }
   } else {
     Offset <- data.frame('BandName' = listBands_bis,
                          'BandID' = c(1,2,3,4,5,6,7,8,11,12),
@@ -1259,7 +1284,7 @@ save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI', datatype='In
   Stars_Spectral$wavelength <- WL_s2[Stars_Spectral$bandname]
 
   SortedWL <- names(WL_s2)
-  Reorder <- match(SortedWL, Stars_Spectral$bandname)
+  Reorder <- match(SortedWL,Stars_Spectral$bandname)
   Elim <- which(is.na(Reorder))
   if (length(Elim)>0){
     Reorder <- Reorder[-Elim]
@@ -1267,7 +1292,7 @@ save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI', datatype='In
   pathR <- S2_stars$attr[Reorder]
 
   names(pathR) <- NULL
-  S2_stars2 <- stars::read_stars(pathR, along = 'band', proxy = TRUE)
+  S2_stars2 <- stars::read_stars(pathR,along='band',proxy=TRUE)
   Stars_Spectral$bandname <- Stars_Spectral$bandname[Reorder]
   Stars_Spectral$wavelength <- Stars_Spectral$wavelength[Reorder]
 
@@ -1279,8 +1304,13 @@ save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI', datatype='In
     print(MTD_MSI)
   } else {
     message('applying offset to reflectance data')
-    offsetS2 = function(x) (round(x + UniqueOffset)*(10000/BOA_QuantVal))
-    S2_stars2 <- stars::st_apply(X = S2_stars2,MARGIN = 'band',FUN = offsetS2)
+    if (is.null(MTD_LaSRC) | UniqueOffset==0){
+      offsetS2 = function(x) (round(x + UniqueOffset)*(10000/BOA_QuantVal))
+      S2_stars2 <- stars::st_apply(X = S2_stars2,MARGIN = 'band',FUN = offsetS2)
+    } else {
+      offsetS2 = function(x) (round(10000*((x+UniqueOffset*BOA_QuantVal)/BOA_QuantVal)))
+      S2_stars2 <- stars::st_apply(X = S2_stars2,MARGIN = 'band',FUN = offsetS2)
+    }
   }
   write_Stack_S2(Stars_S2 = S2_stars2, Stars_Spectral = Stars_Spectral, Refl_path = Refl_path,
                  Format = Format, datatype = datatype, sensor=sensor,MaxChunk = MaxChunk)
@@ -1294,6 +1324,12 @@ save_reflectance_s2 <- function(S2_stars, Refl_path, Format='ENVI', datatype='In
   if (!is.null(MTD_MSI)){
     if (file.exists(MTD_MSI)){
       file.copy(from = MTD_MSI, to = file.path(dirname(Refl_path), basename(MTD_MSI)), overwrite = TRUE)
+    }
+  }
+  # save LaSRC metadata file as well if available
+  if (!is.null(MTD_LaSRC)){
+    if (file.exists(MTD_LaSRC)){
+      file.copy(from = MTD_LaSRC, to = file.path(dirname(Refl_path), basename(MTD_LaSRC)), overwrite = TRUE)
     }
   }
   # delete temporary file
@@ -1804,3 +1840,4 @@ write_Stack_S2 <- function(Stars_S2, Stars_Spectral, Refl_path, Format='ENVI',
 #'
 #'   return(samples)
 #' }
+

@@ -1,0 +1,99 @@
+<tool id="SRS_canopy_indices" name="Compute spectral indices" version="@VERSION@" profile = "20.01">
+    <description>as NDVI and LAI from remote sensing data</description>
+    <macros>
+        <import>macro.xml</import>
+    </macros>
+    <requirements>
+        <!--<requirement type="package" version="1.0_10">r-simsalapar</requirement>
+        <requirement type="package" version="1.5_21">r-terra</requirement>--> 
+        <requirement type="package" version="2.11.0">r-R.utils</requirement>
+        <requirement type="package" version="3.5_15">r-raster</requirement>
+        <requirement type="package" version="1.0_7">r-sf</requirement>
+        <requirement type="package" version="1.4_7">r-sp</requirement>
+        <requirement type="package" version="1.5_29">r-rgdal</requirement>
+        <requirement type="package" version="0.5_9">r-rgeos</requirement>
+        <requirement type="package" version="0.5_5">r-stars</requirement>
+        <requirement type="package" version="1.4.0">r-stringr</requirement>
+        <requirement type="package" version="2.3.8">r-pracma</requirement> 
+        <requirement type="package" version="0.1_7">r-expint</requirement> 
+        <requirement type="package" version="0.62.0">r-matrixStats</requirement> 
+        <requirement type="package" version="3.3.6">r-ggplot2</requirement>
+        <requirement type="package" version="0.4.0">r-ggpubr</requirement>  
+        <requirement type="package" version="0.4.6">r-ggpmisc</requirement>
+        <requirement type="package" version="2.4.2">r-remotes</requirement> 
+        <requirement type="package" version="2.4.3">r-devtools</requirement>   
+        <requirement type="package" version="3.99_0.9">r-xml</requirement>  
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[ 
+        ls > 1 &&
+        cp '$input_raster' '${input_raster.element_identifier}' &&
+        cp '$input_header' '${input_header.element_identifier}' &&
+        Rscript
+            '$__tool_directory__/indices_canopy.r'
+            '$input_raster.element_identifier'
+            '$input_header.element_identifier'
+            '$sentinel2_data'
+            '$__tool_directory__/prosail/Lib_PROSAIL.R'
+            '$__tool_directory__/prosail/Lib_SpectralIndices.R'
+            '$__tool_directory__/prosail/Lib_PROSAIL_HybridInversion.R'
+            '$__tool_directory__/prosail/Lib_PROSAIL_Inversion.R'
+            '$__tool_directory__/prosail/Lib_PROSAIL_LUT.R'
+            '$__tool_directory__/prosail/Lib_SENSOR.R'
+            '$__tool_directory__/prosail/Lib_SOILSPECT.R'
+            '$__tool_directory__/prosail/Sentinel_2A-data.R'
+            '$__tool_directory__/prosail/Sentinel_2-data.R'
+            '$__tool_directory__/data-raw/Sentinel_2A_Spectral_Response.R'
+            '$__tool_directory__/prosail/SpecATM-data.R'
+            '$__tool_directory__/prosail/SpecPROSPECT-data.R'
+            '$__tool_directory__/prosail/SpecSOIL-data.R'
+            '$output_indices'
+            '$output_essai'
+            '$plots'
+        ]]>
+    </command>
+    <inputs>
+        <param name="input_raster" type="data" format="bil" label="Input raster"/>
+        <param name="input_header" type="data" format="hdr" label="Input raster header"/>
+        <param name="sentinel2_data" type="data" format="csv" label="Input sentinel 2 data"/>
+    </inputs>
+    <outputs>
+        <data name="output_indices" from_work_dir="BiodivIndex.tabular" format="tabular" label="Spetral biodiversity Index">
+        </data>
+        <data name="output_essai" from_work_dir="'Experimental_Datapoints.tabular'" format="tabular" label="Spetral biodiversity essai">
+        </data>
+        <collection type="list" name="plots">
+            <discover_datasets pattern="(?P&lt;designation&gt;.+)\.png" visible="false" format="png"/>
+        </collection>
+    </outputs>
+    <tests>
+        <test>
+        </test>
+    </tests>
+    <help><![CDATA[
+=========================================================================
+Computes biodiversity spectral indices from satellite remote sensing data 
+=========================================================================
+
+
+**What it does**
+
+
+
+**Input description**
+
+
+
++--------------+----------+---------------+
+|      BIL     | ENVI HDR |   sel compo   |
++==============+==========+===============+
+| raster stack | Metadata |               |
++--------------+----------+---------------+
+|      ...     |    ...   |               |
++--------------+----------+---------------+
+
+**Output**
+
+
+    ]]>    </help>
+        <expand macro="SRS_BDMRref"/>
+</tool>

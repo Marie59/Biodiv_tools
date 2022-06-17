@@ -32,13 +32,7 @@ if (length(args) < 1) {
     data <- args[1]
     source(args[2])
     data_source <- as.character(args[3])
-    #id <- as.character(args[4])
-    #pwd <- as.character(args[5])
 }   
-
-
-###Identification to acces scihub with sen2r package
-#sen2r::write_scihub_login(id, pwd)
 
 ##____________________________________________________________________##
 ##        Define where data is stored and where to write results      ##
@@ -52,18 +46,20 @@ unzip(data, exdir = "data_dir")
 result_path <- "results"
 dir.create(path = result_path, showWarnings = FALSE, recursive = TRUE)
 
+#Csv file for output useless but needed for linter
 write.csv(data_source, "Mission.csv")
+
 # define raster path
 if (data_source == "SAFE") {
     Path_S2 <- file.path("data_dir", list.files("data_dir", pattern = '.SAFE'))
     #To define the level and know if a correction is needed (convert not ready yet)
     level_info <- get_S2_level(Path_S2)
     if (level_info == 'L1C') {
-        stop('This tool works for data of L2A level and NOT for the L1C level which is currently a work in progress')
+        stop('! This tool works for data of L2A level and NOT for the L1C level which is currently a work in progress !')
     }
-} else {
+}else{
     Path_S2 <- file.path("data_dir")
-} 
+}
 
 ##____________________________________________________________________##
 ##                  Extract, resample & stack data                    ##
@@ -104,14 +100,14 @@ if (data_source == "SAFE") {
 
     # Save Reflectance file as ENVI image with BIL interleaves
     tile_S2 <- substring(strsplit(basename(S2obj$S2_Bands$GRANULE), '_')[[1]][2],2)
-    dateAcq_S2 <- as.Date(substring(strsplit(basename(S2obj$S2_Bands$GRANULE), '_')[[1]][4], 1, 8), format="%Y%m%d")
-} else {
+    dateAcq_S2 <- as.Date(substring(strsplit(basename(S2obj$S2_Bands$GRANULE), '_')[[1]][4], 1, 8), format = "%Y%m%d")
+}else{
     # filename for Reflectance
     Refl_path <- file.path(Refl_dir, paste(basename(S2obj$S2_Bands$Path_tile_S2), '_Refl', sep = ''))
 
     # Save Reflectance file as ENVI image with BIL interleaves
     tile_S2 <- substring(strsplit(basename(S2obj$S2_Bands$Path_tile_S2), '_')[[1]][2],2)
-    dateAcq_S2 <- as.Date(substring(strsplit(basename(S2obj$S2_Bands$Path_tile_S2), '_')[[1]][4], 1, 8), format="%Y%m%d")
+    dateAcq_S2 <- as.Date(substring(strsplit(basename(S2obj$S2_Bands$Path_tile_S2), '_')[[1]][4], 1, 8), format = "%Y%m%d")
 }
 
 save_data <- save_reflectance_s2(S2_stars = S2obj$S2_Stack, Refl_path = Refl_path,

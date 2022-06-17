@@ -1,3 +1,0 @@
-<datatype extension="bil" type="galaxy.datatypes.binary:BIL" display_in_upload="True" />
-<datatype extension="hdr" type="galaxy.datatypes.text:HDR" display_in_upload="True" />
-

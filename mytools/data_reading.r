@@ -21,58 +21,25 @@ remotes::install_github('jbferet/biodivMapR')
 
 args <- commandArgs(trailingOnly = TRUE)
 
-
-# url for the S2 subset
+#####Import the S2 data
 
 if (length(args) < 1) {
     stop("This tool needs at least 1 argument")
 }else{
     data_raster <- args[1]
     rasterheader <- args[2]
-}   
-
-#####Import data
-#créer un dir ou on est mettre les 2 fichier recup le chemin et partir de ce chemin la ??
-dir.create("data_path")
-setwd("data_path")
-filesstrings::file.move(rasterheader, "data_path")
-filesstrings::file.move(data_raster, "data_path")
-
-#destfile_HDR <- biodivMapR::read_ENVI_header(rasterheader)
-
-#destfile <- biodivMapR::read_BIL_image_subset(data_raster, destfile_HDR)
-
-# name your binary raster with the same name as the online file
-# name your raster HDR with the same name as the binary raster, with .hdr extension
-
-# read ENVI file with starss
-#Stars_S2 <- stars::read_stars(destfile, along = 'band',proxy = FALSE)
-# write it as a tiff image
-#destfiletiff <- file.path(tiff_file)
-#r <- stars::write_stars(Stars_S2, dsn=destfiletiff, driver =  'GTiff', type='Int16')
-
-# read ENVI file with stars
-#biodivmapr::create_hdr(ImPath = destfiletiff, Sensor = 'SENTINEL_2A', 
-#           SpectralBands = NULL, BandName = NULL, WLunits = NULL)
-
-# read ENVI file with stars
-BandName <- c('band_02', 'band 03', 'band_04', 'band_05', 'band_06', 
-              'band_07', 'band_08', 'band_08A', 'band_11', 'band_12')
-SpectralBands <- c(496.6, 560.0, 664.5, 703.9, 740.2, 
-                   782.5, 835.1, 864.8, 1613.7, 2202.4)
-WLunits <- 'Nanometers'
-#create_hdr(ImPath = destfiletiff, Sensor = 'MyOwnSensor', 
-#           SpectralBands = SpectralBands,BandName = BandName, WLunits = WLunits)
-
-
+    text_compo <- args[3]
+    plots_zip <- args[4]
+    type <- as.character(args[5])
+}
 
 ################################################################################
 ##              DEFINE PARAMETERS FOR DATASET TO BE PROCESSED                 ##
 ################################################################################
 # expected to be in ENVI HDR  
 
-Input_Image_File <- file.path("data_path", basename(data_raster), fsep = "/")
-stop(Input_Image_File)
+Input_Image_File <- file.path(getwd(), data_raster, fsep = "/")
+Input_Header_File <- file.path(getwd(), rasterheader, fsep = "/")
 # path for the Mask raster corresponding to image to process
 # expected to be in ENVI HDR format, 1 band, integer 8bits
 # expected values in the raster: 0 = masked, 1 = selected
@@ -90,7 +57,7 @@ Output_Dir  = 'RESULTS'
 # too small window_size results in low number of pixels per spatial unit, hence limited range of variation of diversity in the image
 window_size <- 10
 
-# PCA FILTERING:        Set to TRUE if you want second filtering based on PCA outliers to be processed. Slower
+# PCA FILTERING: Set to TRUE if you want second filtering based on PCA outliers to be processed. Slower
 FilterPCA <- TRUE
 
 # type of PCA:
@@ -123,6 +90,7 @@ ImPathShade <- biodivMapR::perform_radiometric_filtering(
 print("PERFORM PCA ON RASTER")
 PCA_Output <- biodivMapR::perform_PCA(Input_Image_File = Input_Image_File, Input_Mask_File = Input_Mask_File,
                           Output_Dir = Output_Dir, TypePCA = TypePCA, FilterPCA = FilterPCA, nbCPU = nbCPU, MaxRAM = MaxRAM)
+
 PCA_Files <- PCA_Output$PCA_Files
 Pix_Per_Partition <- PCA_Output$Pix_Per_Partition
 nb_partitions <- PCA_Output$nb_partitions
@@ -133,11 +101,13 @@ SpectralFilter <- PCA_Output$SpectralFilter
 Input_Mask_File <- PCA_Output$MaskPath
 
 # 3- Select principal components from the PCA raster
-#select_PCA_components(Input_Image_File,Output_Dir,PCA.Files)
 # Select components from the PCA/SPCA/MNF raster
-# Sel_PC = path of the file where selected components are stored
+Image_Name <- tools::file_path_sans_ext(basename(Input_Image_File))
+Output_Dir_Full <- file.path(Output_Dir, Image_Name, TypePCA, "PCA")
+data_components <- read.table(text_compo, sep = "\t", dec = ".", fill = TRUE, encoding = "UTF-8")
+write.table(data_components, paste0(Output_Dir_Full, "/Selected_Components.txt"))
 
-Sel_PC <- biodivMapR::select_PCA_components(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, PCA_Files = PCA_Files, TypePCA = TypePCA, File_Open = TRUE)
+Sel_PC <-  file.path(Output_Dir_Full, "Selected_Components.txt")
 
 ################################################################################
 ##                      MAP ALPHA AND BETA DIVERSITY                          ##
@@ -146,43 +116,57 @@ print("MAP SPECTRAL SPECIES")
 
 Kmeans_info <- biodivMapR::map_spectral_species(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, PCA_Files = PCA_Files, Input_Mask_File = Input_Mask_File, Pix_Per_Partition = Pix_Per_Partition, nb_partitions = nb_partitions, nbCPU = nbCPU, MaxRAM = MaxRAM, nbclusters = nbclusters, TypePCA = TypePCA)
 
+if (type == "alpha" | type == "all") {
+  print("MAP ALPHA DIVERSITY")
+  Index_Alpha <- c('Shannon')
+  alpha_div <- biodivMapR::map_alpha_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM, Index_Alpha = Index_Alpha, nbclusters = nbclusters)
 
-print("MAP ALPHA DIVERSITY")
-Index_Alpha <- c('Shannon')
-alpha_div <- biodivMapR::map_alpha_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM, Index_Alpha = Index_Alpha, nbclusters = nbclusters)
+alpha_path <- file.path(Output_Dir, Image_Name, TypePCA, "ALPHA")
+get_alpha <- alpha_path[grep(pattern = paste0(window_size, '_Fullres.zip'), x = alpha_path)]
+#dir.create("alpha_beta")
+#test <- unzip(get_alpha, exdir = "alpha_beta" )
+#rdf <- as.data.frame(test, xy = TRUE) #Convert raster to data.frame
+}
+#Create a random raster layer
 
+#alpha_map <- ggplot2::ggplot(data = rdf)+
+ # ggplot2::geom_raster(mapping = ggplot2::aes(x = x, y = y))
+#mapper_alpha_div <- ggplot2::ggsave("Alpha_diversity.png", alpha_map, scale = 0.65, width = 12, height = 9, units = "in", dpi = 200, limitsize = TRUE)
+#mapper_alpha <- plot(list.files(file.path("alpha_beta")))
+#save(mapper_alpha, file = "Alpha_map.png")
 
-#alpha_file <- raster::raster(alpha_div)
-#alpha_map <- mapview::mapview(alpha_file, layer.name = "Estimated Shannon index", col.regions = brewer.pal(7, "Dark2")) + mapview::mapview(alphamean_file, legend = FALSE, col.regions = brewer.pal(7, "Dark2"))
-#return(alpha_map)
 ##### Trouver le moyen de mapview le truc la 
 
+if (type == "beta" | type == "all") {
+  print("MAP BETA DIVERSITY")
+  beta_div <- biodivMapR::map_beta_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nb_partitions=nb_partitions, nbCPU = nbCPU, MaxRAM = MaxRAM, nbclusters = nbclusters)
+} 
 
-print("MAP BETA DIVERSITY")
-beta_div <- biodivMapR::map_beta_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nb_partitions=nb_partitions, nbCPU = nbCPU, MaxRAM = MaxRAM, nbclusters = nbclusters)
-
-#beta_file <- raster::raster(beta_div)
-#beta_map <- mapview::mapview(beta_file, layer.name = "PCoA", col.regions = c("red", "blue", "green")) + mapview::mapview(betafull_file, legend = FALSE, col.regions = c("red", "blue", "green"))
-#return(beta_map)
-##### Trouver le moyen de mapview le truc la 
-
-
+if (type == "comparison" | type == "all") {
 ################################################################################
 ##          COMPUTE ALPHA AND BETA DIVERSITY FROM FIELD PLOTS                 ##
 ################################################################################
 ## read selected features from dimensionality reduction 
 Selected_Features <- read.table(Sel_PC)[[1]]
 ## path for selected components
-mapper <- biodivMapR::map_functional_div(Original_Image_File = Input_Image_File, Functional_File = PCA_Files,  Selected_Features = Selected_Features, Output_Dir = Output_Dir, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM,TypePCA = TypePCA)
+mapper <- biodivMapR::map_functional_div(Original_Image_File = Input_Image_File, Functional_File = PCA_Files,  Selected_Features = Selected_Features, Output_Dir = Output_Dir, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM, TypePCA = TypePCA)
 
 # location of the directory where shapefiles used for validation are saved
-VectorDir <- destunz
+dir.create("VectorDir")
+unzip(plots_zip, exdir = "VectorDir")
+
+#Path_Vector <- list.files("VectorDir")
+
+#VectorDir <- destunz
 # list vector data
-Path_Vector <- list_shp(VectorDir)
+Path_Vector <- biodivMapR::list_shp("VectorDir")
 Name_Vector <- tools::file_path_sans_ext(basename(Path_Vector))
+
+
 # location of the spectral species raster needed for validation
 Path_SpectralSpecies <- Kmeans_info$SpectralSpecies
 # get diversity indicators corresponding to shapefiles (no partitioning of spectral dibversity based on field plots so far...)
+
 Biodiv_Indicators <- biodivMapR::diversity_from_plots(Raster_SpectralSpecies = Path_SpectralSpecies, Plots = Path_Vector, nbclusters = nbclusters, Raster_Functional = PCA_Files, Selected_Features = Selected_Features)
 
 Shannon_RS <- c(Biodiv_Indicators$Shannon)[[1]]
@@ -198,7 +182,7 @@ Biodiv_Indicators$Name_Plot = seq(1, length(Biodiv_Indicators$Shannon[[1]]), by 
 ####################################################
 # write a table for Shannon index
 
-write.table(Shannon_RS, file = "ShannonIndex.csv", sep="\t", dec=".", na=" ", row.names = Biodiv_Indicators$Name_Plot, col.names= F, quote=FALSE)
+write.table(Shannon_RS, file = "ShannonIndex.tabular", sep = "\t", dec = ".", na = " ", row.names = Biodiv_Indicators$Name_Plot, col.names = c("Shannon_Index"), quote = FALSE)
 
             
 # write a table for all spectral diversity indices corresponding to alpha diversity
@@ -209,13 +193,13 @@ Results <- data.frame(Name_Vector, Biodiv_Indicators$Richness, Biodiv_Indicators
                       Biodiv_Indicators$FunctionalDiversity$FDiv)
 
 names(Results)  = c("ID_Plot", "Species_Richness", "Fisher", "Shannon", "Simpson", "FRic", "FEve", "FDiv")
-write.table(Results, file = "AlphaDiversity.csv", sep="\t", dec=".", na=" ", row.names = F, col.names= T, quote=FALSE)
+write.table(Results, file = "AlphaDiversity.tabular", sep = "\t", dec = ".", na = " ", row.names = F, col.names = T, quote = FALSE)
   
 
 # write a table for Bray Curtis dissimilarity
 BC_mean <- Biodiv_Indicators$BCdiss
 colnames(BC_mean) <- rownames(BC_mean) <- Biodiv_Indicators$Name_Plot
-write.table(BC_mean, file = "BrayCurtis.csv", sep="\t", dec=".", na=" ", row.names = F, col.names= T, quote=FALSE)
+write.table(BC_mean, file = "BrayCurtis.tabular", sep = "\t", dec = ".", na = " ", row.names = F, col.names = T, quote = FALSE)
 
 
 
@@ -226,7 +210,7 @@ write.table(BC_mean, file = "BrayCurtis.csv", sep="\t", dec=".", na=" ", row.nam
 
 MatBCdist <- as.dist(BC_mean, diag = FALSE, upper = FALSE)
 BetaPCO <- labdsv::pco(MatBCdist, k = 3)
-#plot(BetaPCO)
+
 # assign a type of vegetation to each plot, assuming that the type of vegetation 
 # is defined by the name of the shapefile         
  
@@ -234,7 +218,7 @@ nbSamples <- shpName <- c()
 for (i in 1:length(Path_Vector)){
   shp <- Path_Vector[i]
   nbSamples[i] <- length(rgdal::readOGR(shp,verbose = FALSE))
-  shpName[i] <- file_path_sans_ext(basename(shp))
+  shpName[i] <- tools::file_path_sans_ext(basename(shp))
 }
 
 Type_Vegetation = c()
@@ -244,10 +228,10 @@ for (i in 1: length(nbSamples)){
   }
 }
 
-#  data frame including a selection of alpha diversity metrics and beta diversity expressed as coordinates in the PCoA space
+#data frame including a selection of alpha diversity metrics and beta diversity expressed as coordinates in the PCoA space
 Results <- data.frame('vgtype' = Type_Vegetation, 'pco1' = BetaPCO$points[,1], 'pco2' = BetaPCO$points[,2], 'pco3' = BetaPCO$points[,3], 'shannon' = Shannon_RS, 'FRic' = FRic, 'FEve' = FEve, 'FDiv' = FDiv)
                       
-# plot field data in the PCoA space, with size corresponding to shannon index
+#plot field data in the PCoA space, with size corresponding to shannon index
 g1 <- ggplot2::ggplot(Results, ggplot2::aes(x = pco1, y = pco2, color = vgtype, size = shannon)) + ggplot2::geom_point(alpha = 0.6) + ggplot2::scale_color_manual(values = c("#e6140a", "#e6d214", "#e68214", "#145ae6"))
 
 g2 <- ggplot2::ggplot(Results, ggplot2::aes(x = pco1, y = pco3, color = vgtype, size = shannon)) + ggplot2::geom_point(alpha = 0.6) + ggplot2::scale_color_manual(values = c("#e6140a", "#e6d214", "#e68214", "#145ae6"))
@@ -263,11 +247,17 @@ get_legend <- function(a.gplot) {
 }
 
 legend <- get_legend(g3)
-gAll <- gridExtra::grid.arrange(arrangeGrob(g1 + theme(legend.position = "none"), g2 + theme(legend.position = "none"), g3 + theme(legend.position = "none"), nrow=1), legend, nrow = 2, heights = c(5, 4)) 
+gAll <- gridExtra::grid.arrange(gridExtra::arrangeGrob(g1 + ggplot2::theme(legend.position = "none"), g2 + ggplot2::theme(legend.position = "none"), g3 + ggplot2::theme(legend.position = "none"), nrow=1), legend, nrow = 2, heights = c(3, 2)) 
 
 
-filename <- ggplot2::ggsave("BetaDiversity_PcoA1_vs_PcoA2_vs_PcoA3.png", gAll, scale = 1, width = 12, height = 7, units = "in", dpi = 600, limitsize = TRUE)
+filename <- ggplot2::ggsave("BetaDiversity_PcoA1_vs_PcoA2_vs_PcoA3.png", gAll, scale = 0.65, width = 12, height = 9, units = "in", dpi = 200, limitsize = TRUE)
+}
 
+if (type == "alpha" | type == "all") {
+alpha_map
+}else if (type == "beta" | type == "all") {
+beta_map
+} else {
 filename
-
+}
 

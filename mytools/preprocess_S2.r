@@ -53,6 +53,9 @@ result_path <- "results"
 dir.create(path = result_path, showWarnings = FALSE, recursive = TRUE)
 
 write.csv(data_source, "Mission.csv")
+
+Path_S2 <- S2_from_L1C_to_L2A(basename(data), "data_dir", "results", datePattern = "2022-06-07")
+stop('t belle')
 # define raster path
 if (data_source == "SAFE") {
     Path_S2 <- file.path("data_dir", list.files("data_dir", pattern = '.SAFE'))

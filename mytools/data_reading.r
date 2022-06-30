@@ -121,11 +121,15 @@ if (type == "alpha" | type == "all") {
   Index_Alpha <- c('Shannon')
   alpha_div <- biodivMapR::map_alpha_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM, Index_Alpha = Index_Alpha, nbclusters = nbclusters)
 
-alpha_path <- file.path(Output_Dir, Image_Name, TypePCA, "ALPHA")
-get_alpha <- alpha_path[grep(pattern = paste0(window_size, '_Fullres.zip'), x = alpha_path)]
-#dir.create("alpha_beta")
-#test <- unzip(get_alpha, exdir = "alpha_beta" )
-#rdf <- as.data.frame(test, xy = TRUE) #Convert raster to data.frame
+alpha_path <- file.path(Output_Dir, Image_Name, TypePCA, "ALPHA", "Shannon_10_Fullres.zip")
+dir.create("alpha")
+unzip(alpha_path, exdir = "alpha_fold")
+alpha_data <- list.files("alpha_fold")
+
+get_alpha <- stars::read_stars(alpha_data)
+#get_alpha <- grep(pattern = paste0(window_size, '_Fullres.zip'), x = alpha_path)
+
+alpha_plot <- rasterVis::levelplot(alpha_data,layout=c(0,1,1), main="alpha")
 }
 #Create a random raster layer
 
@@ -139,18 +143,20 @@ get_alpha <- alpha_path[grep(pattern = paste0(window_size, '_Fullres.zip'), x = 
 
 if (type == "beta" | type == "all") {
   print("MAP BETA DIVERSITY")
-  beta_div <- biodivMapR::map_beta_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nb_partitions=nb_partitions, nbCPU = nbCPU, MaxRAM = MaxRAM, nbclusters = nbclusters)
+  beta_div <- biodivMapR::map_beta_div(Input_Image_File = Input_Image_File, Output_Dir = Output_Dir, TypePCA = TypePCA, window_size = window_size, nb_partitions = nb_partitions, nbCPU = nbCPU, MaxRAM = MaxRAM, nbclusters = nbclusters)
 } 
 
-if (type == "comparison" | type == "all") {
+
 ################################################################################
 ##          COMPUTE ALPHA AND BETA DIVERSITY FROM FIELD PLOTS                 ##
 ################################################################################
 ## read selected features from dimensionality reduction 
 Selected_Features <- read.table(Sel_PC)[[1]]
 ## path for selected components
-mapper <- biodivMapR::map_functional_div(Original_Image_File = Input_Image_File, Functional_File = PCA_Files,  Selected_Features = Selected_Features, Output_Dir = Output_Dir, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM, TypePCA = TypePCA)
 
+if (type == "funct" | type == "all") {
+mapper <- biodivMapR::map_functional_div(Original_Image_File = Input_Image_File, Functional_File = PCA_Files,  Selected_Features = Selected_Features, Output_Dir = Output_Dir, window_size = window_size, nbCPU = nbCPU, MaxRAM = MaxRAM, TypePCA = TypePCA)
+}
 # location of the directory where shapefiles used for validation are saved
 dir.create("VectorDir")
 unzip(plots_zip, exdir = "VectorDir")
@@ -181,10 +187,11 @@ Biodiv_Indicators$Name_Plot = seq(1, length(Biodiv_Indicators$Shannon[[1]]), by 
 # write RS indicators
 ####################################################
 # write a table for Shannon index
-
+if (type == "alpha" | type == "comparison" | type == "all") {
 write.table(Shannon_RS, file = "ShannonIndex.tabular", sep = "\t", dec = ".", na = " ", row.names = Biodiv_Indicators$Name_Plot, col.names = c("Shannon_Index"), quote = FALSE)
+}
 
-            
+if (type == "funct" | type == "comparison" | type == "all") {            
 # write a table for all spectral diversity indices corresponding to alpha diversity
 Results <- data.frame(Name_Vector, Biodiv_Indicators$Richness, Biodiv_Indicators$Fisher,
                       Biodiv_Indicators$Shannon, Biodiv_Indicators$Simpson,
@@ -194,15 +201,16 @@ Results <- data.frame(Name_Vector, Biodiv_Indicators$Richness, Biodiv_Indicators
 
 names(Results)  = c("ID_Plot", "Species_Richness", "Fisher", "Shannon", "Simpson", "FRic", "FEve", "FDiv")
 write.table(Results, file = "AlphaDiversity.tabular", sep = "\t", dec = ".", na = " ", row.names = F, col.names = T, quote = FALSE)
-  
+}
 
+if (type == "beta" | type == "comparison" | type == "all") {
 # write a table for Bray Curtis dissimilarity
 BC_mean <- Biodiv_Indicators$BCdiss
 colnames(BC_mean) <- rownames(BC_mean) <- Biodiv_Indicators$Name_Plot
 write.table(BC_mean, file = "BrayCurtis.tabular", sep = "\t", dec = ".", na = " ", row.names = F, col.names = T, quote = FALSE)
+}
 
-
-
+if (type == "comparison" | type == "all") {
 ####################################################
 # illustrate results
 ####################################################
@@ -251,13 +259,7 @@ gAll <- gridExtra::grid.arrange(gridExtra::arrangeGrob(g1 + ggplot2::theme(legen
 
 
 filename <- ggplot2::ggsave("BetaDiversity_PcoA1_vs_PcoA2_vs_PcoA3.png", gAll, scale = 0.65, width = 12, height = 9, units = "in", dpi = 200, limitsize = TRUE)
-}
 
-if (type == "alpha" | type == "all") {
-alpha_map
-}else if (type == "beta" | type == "all") {
-beta_map
-} else {
 filename
 }
 

@@ -57,6 +57,24 @@
             </citation>   
         </citations>
     </xml>
+    <xml name="SRS_rasterdivref">
+        <citations>
+            <citation type="doi">https://doi.org/10.1111/2041-210X.13583</citation>   
+        </citations>
+    </xml>
+    <xml name="SRS_prosailref">
+        <citations>
+            <citation type="bibtex">
+            @Manual{,
+            title = {prosail: PROSAIL leaf and canopy radiative transfer model and inversion routines},
+            author = {Jean-Baptiste Feret and Florian {de Boissieu}},
+            year = {2022},
+            note = {R package version 1.1.1},
+            url = {https://gitlab.com/jbferet/prosail},
+            }
+            </citation>   
+        </citations>
+    </xml>
     <xml name="topic">
         <edam_topics>
            <edam_topic>topic_0610</edam_topic>

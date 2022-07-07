@@ -1,0 +1,134 @@
+<tool id="SRS_process_data" name="Processing remote sensing data" version="@VERSION@" profile = "20.01">
+    <description>to produce (spectral) diversity indicators and maps</description>
+    <macros>
+        <import>macro.xml</import>
+    </macros>
+    <expand macro="SRS_requirements">
+        <requirement type="package" version="0.62.0">r-matrixStats</requirement> 
+        <requirement type="package" version="0.51.2">r-rastervis</requirement>
+        <requirement type="package" version="1.25.0">r-future</requirement>
+        <requirement type="package" version="1.9.0">r-future.apply</requirement>
+        <requirement type="package" version="3.3.6">r-ggplot2</requirement>
+        <requirement type="package" version="0.31">r-xfun</requirement>
+        <requirement type="package" version="2.11.0">r-mapview</requirement>
+        <requirement type="package" version="0.1.0">r-leafpop</requirement>
+        <requirement type="package" version="1.1_3">r-rcolorbrewer</requirement>
+        <requirement type="package" version="2.0_1">r-labdsv</requirement>
+        <requirement type="package" version="2.3">r-gridextra</requirement>
+        <requirement type="package" version="1.14.2">r-data.table</requirement>
+        <requirement type="package" version="2.0.9">r-ecodist</requirement>
+        <requirement type="package" version="13.3">r-fields</requirement>
+        <requirement type="package" version="0.4.6">r-geometry</requirement>
+        <requirement type="package" version="1.0.2">r-matlab</requirement>
+        <requirement type="package" version="0.4_4">r-snow</requirement>
+        <requirement type="package" version="2.6_2">r-vegan</requirement>
+        <requirement type="package" version="2.4.2">r-remotes</requirement> 
+        <requirement type="package" version="3.0.0">r-emstreer</requirement>
+        <requirement type="package" version="1.6.1">r-mmand</requirement>
+        <requirement type="package" version="1.0">r-dissutils</requirement>  
+        <requirement type="package" version="3.2.2">r-filesstrings</requirement>  
+    </expand>
+    <command detect_errors="exit_code"><![CDATA[ 
+        cp '$input_raster' '${input_raster.element_identifier}' &&
+        cp '$input_header' '${input_header.element_identifier}' &&
+        Rscript
+            '$__tool_directory__/data_reading.r'
+            '$input_raster.element_identifier'
+            '$input_header.element_identifier'
+            '$sel_compo'
+            '$input_plot'
+            '$type'
+            '$output_shannon'
+            '$output_alpha'
+            '$output_beta'
+            '$output_file_alpha'
+            '$output_file_beta'
+            '$output_funct_div'
+            '$plots'
+        ]]>
+    </command>
+    <inputs>
+        <param name="input_raster" type="data" format="bil" label="Input raster"/>
+        <param name="input_header" type="data" format="hdr" label="Input raster header"/>
+        <param name="sel_compo" type="data" format="txt" label="Input selected components"/>
+        <param name="input_plot" type="data" format="data" label="Plots folder zip"/>
+        <param name="type" type="select" label="Alpha, beta, functional diversity and comparison plot and map" display="radio">
+            <option value="alpha">Alpha diversity map</option>
+            <option value="beta">Beta diversity map</option>
+            <option value="funct">Functional diversity map</option>
+            <option value="comparison">Comparison plot</option>
+            <option value="all">All of the above</option>
+        </param>
+    </inputs>
+    <outputs>
+        <data name="output_shannon" from_work_dir="ShannonIndex.tabular" format="tabular" label="Shannon Index">
+            <filter> type == 'alpha' or type == 'comparison' or type == 'all'</filter>
+        </data>
+        <data name="output_alpha" from_work_dir="AlphaDiversity.tabular" format="tabular" label="Alpha diversity">
+            <filter> type == 'funct' or type == 'comparison' or type == 'all'</filter>
+        </data>
+        <data name="output_beta" from_work_dir="BrayCurtis.tabular" format="tabular" label="Beta diversity">
+            <filter> type == 'beta' or type == 'comparison' or type == 'all'</filter>
+        </data>
+        <collection name="output_file_alpha" type="list" format="bil,hdr" label="Alpha">
+            <discover_datasets pattern="(?P&lt;designation&gt;.+)" directory="RESULTS/${input_raster.element_identifier}/SPCA/ALPHA" visible="false"/>
+            <filter> type == 'alpha' or type == 'all'</filter>
+        </collection>
+        <collection name="output_file_beta" type="list" format="bil,hdr" label="Beta">
+            <discover_datasets pattern="(?P&lt;designation&gt;.+)" directory="RESULTS/${input_raster}/SPCA/BETA/" visible="false"/>
+            <filter> type == 'beta' or type == 'all'</filter>
+        </collection>
+        <collection name="output_funct_div" type="list" format="bil,hdr" label="Functional diversity (richness, eveness, divergence)">
+            <discover_datasets pattern="(?P&lt;designation&gt;.+)" directory="RESULTS/S2A_T33NUD_20180104_Subset/SPCA/FUNCTIONAL/" visible="false"/>
+            <filter> type == 'funct' or type == 'all'</filter>
+        </collection>
+        <collection type="list" name="plots">
+            <discover_datasets pattern="(?P&lt;designation&gt;.+)\.pdf" visible="false" format="pdf"/>
+            <filter> type == 'alpha' or type == 'all'</filter>
+        </collection>
+    </outputs>
+    <tests>
+        <test>
+        </test>
+    </tests>
+    <help><![CDATA[
+========================================================================
+Process satellite remote sensing data to produce biodiversity indicators
+========================================================================
+
+
+**What it does**
+
+The goal of this tool using the package biodivMapR is to produce (spectral) diversity maps based on (optical) images. 
+
+**Input description**
+
+It expects an image file as input, with a specific data format. ENVI HDR image with BIL interleave required.
+The image is an ENVI raster including :
+
+- A binary file (which has no extension here).
+
+- A header file (with .hdr extension).
+
+The header file is a text file including all necessary metadata which can be read with a text editor. It includes image dimensions, projection, and the name and central wavelength for each spectral band.
+
+In order to get such input we advise to use the tool preprocessing sentinel 2 data. 
+
++--------------+----------+---------------+
+|      BIL     | ENVI HDR |   sel compo   |
++==============+==========+===============+
+| raster stack | Metadata |               |
++--------------+----------+---------------+
+|      ...     |    ...   |               |
++--------------+----------+---------------+
+
+**Output**
+
+3 tabulars : shannon, bray curtis, alpha
+
+1 plot 
+
+2 diversity maps 
+    ]]>    </help>
+        <expand macro="SRS_BDMRref"/>
+</tool>

@@ -39,6 +39,7 @@ if (length(args) < 1) {
 ########################################################################
 # Read raster
 nv_data <- raster::raster(data_raster)
+nv_data <- raster::aggregate(nv_data, fact = 50)
 # Convert raster to SpatialPointsDataFrame
 r_pts <- raster::rasterToPoints(nv_data, spatial = T)
 
@@ -59,6 +60,7 @@ SensorBands <- HDR_Refl$wavelength
 # compute a set of spectral indices defined by IndexList from S2 data
 IndexList <- c(indice_choice)
 # ReflFactor = 10000 when reflectance is coded as INT16
+Refl <- raster::aggregate(Refl, fact = 50)
 Indices <- ComputeSpectralIndices_Raster(Refl = Refl, SensorBands = SensorBands,
                                                   Sel_Indices = IndexList,
                                                   ReflFactor = 10000, StackOut=F)

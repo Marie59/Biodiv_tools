@@ -33,7 +33,7 @@ copNDVI <- raster::raster(data_raster)
 copNDVIlr <- raster::reclassify(copNDVI, cbind(252, 255, NA), right=TRUE)
 
 #Resample using raster::aggregate and a linear factor of 10
-copNDVIlr <- raster::aggregate(copNDVIlr, fact = 20)
+copNDVIlr <- raster::aggregate(copNDVIlr, fact = 50)
 #Set float numbers as integers to further speed up the calculation
 storage.mode(copNDVIlr[]) = "integer"
 
@@ -80,10 +80,11 @@ ber_name <- "Berger-Parker"
 r_pts@data[, ber_name] <- ber_df[, 1]
 
 #Pielou's Evenness
-pie <- rasterdiv::Pielou(copNDVIlr, window = 9, np = 1)
-pie_df <- data.frame(raster::rasterToPoints(pie, spatial = T))
-pie_name <- "Pielou"
-r_pts@data[, pie_name] <- pie_df[, 1]
+#pie <- rasterdiv::Pielou(copNDVIlr, window = 9, np = 1)
+#pie_df <- data.frame(raster::rasterToPoints(pie, spatial = T))
+#stop(length(pie_df[, 1]), "et", length(r_pts@data[, 1]))
+#pie_name <- "Pielou"
+#r_pts@data[, pie_name] <- pie_df[, 1]
 
 #Hill's numbers
 hil <- rasterdiv::Hill(copNDVIlr, window = 9, alpha = alpha, np = 1)
@@ -104,10 +105,12 @@ cre_name <- "CRE"
 r_pts@data[, cre_name] <- cre_df[, 1]
 
 ## Plotting all the graph and writing a tabular
-list_indice <- list("Shannon", "Renyi", "Berger-Parker", "Pielou", "Hill", "Prao", "CRE")
+list_indice <- list("Shannon", "Renyi", "Berger-Parker", "Hill", "Prao", "CRE")
 for (indice in list_indice) {
   spectrale_indices(data = r_pts@data, indice_choice = indice)
 }
 
 write.table(r_pts@data, file = "BiodivIndex.tabular", sep = "\t", dec = ".", na = " ", row.names = F, col.names = T, quote = FALSE)
+
+
 

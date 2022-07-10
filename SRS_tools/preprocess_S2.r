@@ -1,7 +1,7 @@
 #Rscript
 
 ###########################################
-##    Mapping alpha and beta diversity   ##
+##     Preprocessing Sentinel 2 data     ##
 ###########################################
 
 #####Packages : sen2r,

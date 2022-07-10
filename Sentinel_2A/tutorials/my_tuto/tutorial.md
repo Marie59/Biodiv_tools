@@ -28,11 +28,8 @@ contributors:
 
 <!-- This is a comment. -->
 
-General introduction about the topic and then an introduction of the
-tutorial (the questions and the objectives). It is nice also to have a
-scheme to sum up the pipeline used during the tutorial. The idea is to
-give to trainees insight into the content of the tutorial and the (theoretical
-and technical) key concepts they will learn.
+This tutorial will guide you on getting Sentinel 2A data and precessing them in order to calculate and visualize biodiversity indicators.
+We’ll be using data extracted from the Copernicus portal, Scihub.  Fisrt those data will be reformated. We’ll explore this dataset in the view of making biodiversity analyses so we will compute alpha and beta indicators, calculate Shannon, Hill and others indices and finally plot how the data is distributed through space and time, etc … .
 
 You may want to cite some publications; this can be done by adding citations to the
 bibliography file (`tutorial.bib` file next to your `tutorial.md` file). These citations
@@ -84,67 +81,46 @@ have fun!
 
 > ### {% icon hands_on %} Hands-on: Data upload
 >
-> 1. Create a new history for this tutorial
-> 2. Import the files from [Zenodo]({{ page.zenodo_link }}) or from
->    the shared data library (`GTN - Material` -> `{{ page.topic_name }}`
->     -> `{{ page.title }}`):
+> 1. Create a new history for this tutorial and give it a name (example: “Sentinel 2A data for biodiversity tutorial”) for you to find it again later if needed.
+>    {% snippet faqs/galaxy/histories_create_new.md box_type="none" %}
+> 2. Download the files from [Scihub]({{ https://scihub.copernicus.eu/dhus/#/home }}) or from
+>    [PEPS]({{ https://peps.cnes.fr/rocket/#/search?maxRecords=50&page=1 }} :
 >
->    ```
+>    You will need to to create an account for either of these platform.
 >    
->    ```
->    ***TODO***: *Add the files by the ones on Zenodo here (if not added)*
+>    You will download a zip folder. Keep it that way. 
+>    ***TODO***: *Upload the zip folder*
 >
->    ***TODO***: *Remove the useless files (if added)*
+> ### {% icon tip %} Tip: Importing data from your computer
 >
->    {% snippet faqs/galaxy/datasets_import_via_link.md %}
+>    * Open the Galaxy Upload Manager {% icon galaxy-upload %}
+>    * Select **Choose local files**
+>    * Browse in your computer and get the downloaded zip folder
+>    * Press **Start**
+{: .tip}
 >
->    {% snippet faqs/galaxy/datasets_import_from_data_library.md %}
+> 3. Rename the datasets “sentinel_2a_data.zip" for example and preview your dataset
 >
-> 3. Rename the datasets
-> 4. Check that the datatype
->
->    {% snippet faqs/galaxy/datasets_change_datatype.md datatype="datatypes" %}
->
-> 5. Add to each database a tag corresponding to ...
->
->    {% snippet faqs/galaxy/datasets_add_tag.md %}
 >
 {: .hands_on}
 
-# Title of the section usually corresponding to a big step in the analysis
+# Reformating data
 
-It comes first a description of the step: some background and some theory.
-Some image can be added there to support the theory explanation:
-
-![Alternative text](../../images/image_name "Legend of the image")
-
-The idea is to keep the theory description before quite simple to focus more on the practical part.
-
-***TODO***: *Consider adding a detail box to expand the theory*
-
-> ### {% icon details %} More details about the theory
->
-> But to describe more details, it is possible to use the detail boxes which are expandable
->
-{: .details}
-
-A big step can have several subsections or sub steps:
-
+>   Unzips, reads and preprocesses Sentinel 2A zip folder data.
 
 ## Sub-step with **Preprocessing sentinel 2 data**
 
-> ### {% icon hands_on %} Hands-on: Task description
+> ### {% icon hands_on %} Hands-on: Preprocess
 >
 > 1. {% tool [Preprocessing sentinel 2 data](SRS_preprocess_S2) %} with the following parameters:
->    - {% icon param-file %} *"Input data"*: `output` (Input dataset)
+>    - {% icon param-file %} *"Input data"*: `sentinel_2a_data.zip` (Input dataset)
+>    - {% icon param-select %} *"Where does your data come from ?"*: 'From Scihub or Peps'
 >
->    ***TODO***: *Check parameter descriptions*
->
->    ***TODO***: *Consider adding a comment or tip box*
+> 2. Click on **Execute** 
 >
 >    > ### {% icon comment %} Comment
 >    >
->    > A comment about the tool or something else. This box can also be in the main text
+>    > The interesting output is the ENVI image format which is a flat-binary raster file with an accompanying ASCII header file. The data are stored as a binary stream of bytes in a file without extension
 >    {: .comment}
 >
 {: .hands_on}
@@ -154,32 +130,46 @@ A big step can have several subsections or sub steps:
 > ### {% icon question %} Questions
 >
 > 1. Question1?
-> 2. Question2?
 >
 > > ### {% icon solution %} Solution
 > >
 > > 1. Answer for question1
-> > 2. Answer for question2
 > >
 > {: .solution}
 >
 {: .question}
 
+# Producing biodiversity indicateurs
+
+>   You can choose to compute spectral and biodiversity indicators either for global remote sensing data or for a canopy.
+
 ## Sub-step with **Compute spectral indices**
 
-> ### {% icon hands_on %} Hands-on: Task description
+> ### {% icon hands_on %} Hands-on: spectral indices
 >
 > 1. {% tool [Compute spectral indices](SRS_canopy_indices) %} with the following parameters:
 >    - {% icon param-file %} *"Input raster"*: `output_refl` (output of **Preprocessing sentinel 2 data** {% icon tool %})
 >    - {% icon param-file %} *"Input raster header"*: `output_refl` (output of **Preprocessing sentinel 2 data** {% icon tool %})
+>    - {% icon param-select %} *"Input the type of indice you want"*: 'NDVI'
 >
->    ***TODO***: *Check parameter descriptions*
+>    ***TODO***: *Check that the "Input raster" is bil datatype and that "Input raster header" is a hdr datatype*
+> ### {% icon tip %} Tip: Checking datatype
 >
->    ***TODO***: *Consider adding a comment or tip box*
+>    * Go on your raster data 
+>    * Click on {% icon galaxy-pencil %} to edit it
+>    * Click on {% icon galaxy-chart-select-data %} Datatypes
+>    * On "New Type" **Select** bil 
+>    * Press **Save**
 >
 >    > ### {% icon comment %} Comment
 >    >
->    > A comment about the tool or something else. This box can also be in the main text
+>    > Do the same for the raster header with the datatype hdr
+>    {: .comment}
+{: .tip}
+>
+>    > ### {% icon comment %} Comment
+>    >
+>    > You can choose whichever indice you want
 >    {: .comment}
 >
 {: .hands_on}
@@ -189,12 +179,10 @@ A big step can have several subsections or sub steps:
 > ### {% icon question %} Questions
 >
 > 1. Question1?
-> 2. Question2?
 >
 > > ### {% icon solution %} Solution
 > >
 > > 1. Answer for question1
-> > 2. Answer for question2
 > >
 > {: .solution}
 >
@@ -202,19 +190,17 @@ A big step can have several subsections or sub steps:
 
 ## Sub-step with **Compute biodiversity indices**
 
-> ### {% icon hands_on %} Hands-on: Task description
+> ### {% icon hands_on %} Hands-on: Biodiversity indicators for global remote sensing data
 >
 > 1. {% tool [Compute biodiversity indices](SRS_global_indices) %} with the following parameters:
 >    - {% icon param-file %} *"Input raster"*: `output_refl` (output of **Preprocessing sentinel 2 data** {% icon tool %})
 >    - {% icon param-file %} *"Input raster header"*: `output_refl` (output of **Preprocessing sentinel 2 data** {% icon tool %})
+>    - {% icon param-text %} *"Write a number of the value of alpha"*: '1'
 >
->    ***TODO***: *Check parameter descriptions*
->
->    ***TODO***: *Consider adding a comment or tip box*
 >
 >    > ### {% icon comment %} Comment
 >    >
->    > A comment about the tool or something else. This box can also be in the main text
+>    > Same as the compute spectral indices make sure you have the right datatypes bil and hdr.
 >    {: .comment}
 >
 {: .hands_on}
@@ -224,12 +210,10 @@ A big step can have several subsections or sub steps:
 > ### {% icon question %} Questions
 >
 > 1. Question1?
-> 2. Question2?
 >
 > > ### {% icon solution %} Solution
 > >
 > > 1. Answer for question1
-> > 2. Answer for question2
 > >
 > {: .solution}
 >
@@ -237,7 +221,7 @@ A big step can have several subsections or sub steps:
 
 ## Sub-step with **Processing remote sensing data**
 
-> ### {% icon hands_on %} Hands-on: Task description
+> ### {% icon hands_on %} Hands-on: Biodiversity indicators for canopy remote sensing data
 >
 > 1. {% tool [Processing remote sensing data](SRS_process_data) %} with the following parameters:
 >    - {% icon param-file %} *"Input raster"*: `output_refl` (output of **Preprocessing sentinel 2 data** {% icon tool %})
@@ -260,12 +244,10 @@ A big step can have several subsections or sub steps:
 > ### {% icon question %} Questions
 >
 > 1. Question1?
-> 2. Question2?
 >
 > > ### {% icon solution %} Solution
 > >
 > > 1. Answer for question1
-> > 2. Answer for question2
 > >
 > {: .solution}
 >

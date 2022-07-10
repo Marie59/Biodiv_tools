@@ -56,7 +56,7 @@ We’ll be using data extracted from the Copernicus portal, Scihub.  Fisrt those
 >    You will need to to create an account for either of these platform.
 >    
 >    You will download a zip folder. Keep it that way. 
->    ***TODO***: *Upload the zip folder*
+> 3. Upload the zip folder
 >
 > ### {% icon tip %} Tip: Importing data from your computer
 >
@@ -66,7 +66,7 @@ We’ll be using data extracted from the Copernicus portal, Scihub.  Fisrt those
 >    * Press **Start**
 {: .tip}
 >
-> 3. Rename the datasets “sentinel_2a_data.zip" for example and preview your dataset
+> 4. Rename the datasets “sentinel_2a_data.zip" for example and preview your dataset
 >
 >
 {: .hands_on}
